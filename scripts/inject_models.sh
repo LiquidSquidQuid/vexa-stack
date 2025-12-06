@@ -90,6 +90,8 @@ process_manifest() {
         local size=$(echo "$model" | jq -r '.size')
         local required=$(echo "$model" | jq -r '.required')
         local description=$(echo "$model" | jq -r '.description')
+        local source=$(echo "$model" | jq -r '.source // "direct"')
+        local gdrive_id=$(echo "$model" | jq -r '.gdrive_id // ""')
         
         # Skip non-required models for now
         if [ "$required" != "true" ]; then
@@ -99,6 +101,23 @@ process_manifest() {
         # Skip placeholder URLs
         if [[ "$url" == placeholder_* ]]; then
             echo -e "${YELLOW}  Skipping $name (placeholder URL)${NC}"
+            continue
+        fi
+        
+        # Handle Google Drive models
+        if [ "$source" == "gdrive" ] || [[ "$url" == gdrive://* ]]; then
+            echo -e "${BLUE}  Google Drive model detected${NC}"
+            # Use the Google Drive download script
+            bash "$SCRIPT_DIR/download_from_gdrive.sh" "$COMFYUI_DIR" > /dev/null 2>&1 || {
+                echo -e "${YELLOW}  Attempting Google Drive download...${NC}"
+                if command -v gdown &> /dev/null || pip install gdown -q; then
+                    if [ -n "$gdrive_id" ]; then
+                        gdown --id "$gdrive_id" -O "$dest_dir/$name" --quiet || echo -e "${YELLOW}  Manual upload needed${NC}"
+                    else
+                        echo -e "${YELLOW}  Upload $name to Google Drive folder${NC}"
+                    fi
+                fi
+            }
             continue
         fi
         

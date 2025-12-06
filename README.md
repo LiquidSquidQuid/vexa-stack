@@ -32,7 +32,9 @@ This will:
 
 ## 📦 What Gets Installed
 
-### Models
+### Models (via Google Drive)
+The setup now supports downloading models from your Google Drive folder:
+- **Drive Folder**: [Your Model Storage](https://drive.google.com/drive/folders/1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L)
 - **RealVisXL V5.0 Lightning** (6.46GB) - Primary photorealistic model
 - **Pony Realism v2.2** (6.46GB) - Alternative realistic model with VAE
 - **SDXL VAE** (335MB) - For better color reproduction
@@ -94,6 +96,27 @@ vexa-stack/
 ├── prompts/                    # Prompt templates
 └── utils/                      # Utility scripts
 ```
+
+## 📤 Google Drive Integration
+
+### Upload Models from Mac
+1. Run the upload helper on your Mac:
+   ```bash
+   bash scripts/upload_to_gdrive_mac.sh
+   ```
+2. This will show you which models to upload
+3. Drag and drop files to: [Google Drive Folder](https://drive.google.com/drive/folders/1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L)
+
+### Download on RunPod
+Models are automatically downloaded from Google Drive during setup. To manually download:
+```bash
+bash vexa-stack/scripts/download_from_gdrive.sh
+```
+
+### Get File IDs (for direct downloads)
+1. Right-click file in Google Drive → "Get link"
+2. Extract ID from URL: `drive.google.com/file/d/FILE_ID_HERE/view`
+3. Update `configs/model_manifest.json` with the ID
 
 ## 🔧 Configuration
 

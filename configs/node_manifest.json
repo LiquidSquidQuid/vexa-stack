@@ -1,0 +1,105 @@
+{
+  "custom_nodes": [
+    {
+      "name": "ComfyUI-Manager",
+      "url": "https://github.com/ltdrdata/ComfyUI-Manager.git",
+      "description": "Essential manager for installing other custom nodes",
+      "required": true,
+      "install_type": "git_clone",
+      "post_install": null
+    },
+    {
+      "name": "ComfyUI_IPAdapter_plus",
+      "url": "https://github.com/cubiq/ComfyUI_IPAdapter_plus.git",
+      "description": "IPAdapter for style and face consistency",
+      "required": true,
+      "install_type": "git_clone",
+      "post_install": "pip install -r requirements.txt"
+    },
+    {
+      "name": "ComfyUI-Advanced-ControlNet",
+      "url": "https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet.git",
+      "description": "Advanced ControlNet implementation",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null
+    },
+    {
+      "name": "comfyui_controlnet_aux",
+      "url": "https://github.com/Fannovel16/comfyui_controlnet_aux.git",
+      "description": "ControlNet preprocessors",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": "pip install -r requirements.txt"
+    },
+    {
+      "name": "ComfyUI-AnimateDiff-Evolved",
+      "url": "https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved.git",
+      "description": "AnimateDiff for video generation",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null
+    },
+    {
+      "name": "ComfyUI-VideoHelperSuite",
+      "url": "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git",
+      "description": "Video processing utilities",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": "pip install -r requirements.txt"
+    },
+    {
+      "name": "ComfyUI_FizzNodes",
+      "url": "https://github.com/FizzleDorf/ComfyUI_FizzNodes.git",
+      "description": "Scheduling and prompting utilities",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null
+    },
+    {
+      "name": "ComfyUI-Impact-Pack",
+      "url": "https://github.com/ltdrdata/ComfyUI-Impact-Pack.git",
+      "description": "Face detailer and other utilities",
+      "required": true,
+      "install_type": "git_clone",
+      "post_install": "python install.py"
+    },
+    {
+      "name": "efficiency-nodes-comfyui",
+      "url": "https://github.com/LucianoCirino/efficiency-nodes-comfyui.git",
+      "description": "Workflow efficiency improvements",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null
+    },
+    {
+      "name": "rgthree-comfy",
+      "url": "https://github.com/rgthree/rgthree-comfy.git",
+      "description": "Quality of life improvements",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": "pip install -r requirements.txt"
+    },
+    {
+      "name": "ComfyUI-Custom-Scripts",
+      "url": "https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git",
+      "description": "UI enhancements and utilities",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null
+    },
+    {
+      "name": "ComfyUI_Comfyroll_CustomNodes",
+      "url": "https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git",
+      "description": "Large collection of utility nodes",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null
+    }
+  ],
+  "install_settings": {
+    "auto_update": false,
+    "install_dependencies": true,
+    "restart_required_after": ["ComfyUI-Manager", "ComfyUI-Impact-Pack"]
+  }
+}

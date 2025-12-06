@@ -1,0 +1,91 @@
+# Vexa Base Prompts for Dataset Generation
+
+## SFW Portrait Prompts
+
+### Base Description
+beautiful woman, 25 years old, professional photography, high quality, detailed face, natural lighting
+
+### Style Modifiers
+- 8k uhd, film grain, Fujifilm XT3
+- professional headshot, studio lighting, shallow depth of field
+- golden hour, outdoor portrait, natural light
+- fashion photography, editorial style, vogue
+
+### Appearance Variations
+- long flowing hair, elegant pose
+- athletic build, confident expression
+- professional attire, business casual
+- casual streetwear, relaxed pose
+
+## Full Body Prompts
+
+### Base
+full body portrait, standing pose, professional model, high resolution
+
+### Environments
+- modern office interior, professional setting
+- urban street, city background, street photography
+- nature backdrop, outdoor location, environmental portrait
+- minimalist studio, white background, fashion shoot
+
+## Negative Prompts (Universal)
+
+### Quality Issues
+(worst quality:2), (low quality:2), (normal quality:2), lowres, blurry, pixelated
+
+### Unwanted Elements
+text, watermark, logo, banner, signature, username
+
+### Anatomy Issues
+bad anatomy, bad hands, missing fingers, extra fingers, ugly fingers, long fingers
+bad face, fused face, cloned face, worst face
+missing arms, missing legs, extra arms, extra legs
+poorly drawn face, mutation, deformed, disgusting
+
+### Style Issues
+cartoon, 3d render, anime, sketch, painting, illustration
+monochrome, black and white (unless specified)
+
+### Content Issues
+child, minor, underage
+nsfw, nude, explicit (for SFW generation)
+
+## Prompt Templates
+
+### Template 1: Professional Headshot
+```
+professional headshot of a beautiful 25 year old woman, confident smile, business attire, 
+studio lighting, shallow depth of field, high quality, 8k resolution, film photography
+```
+
+### Template 2: Lifestyle Portrait
+```
+candid portrait of an attractive woman in her mid-twenties, natural expression, 
+casual clothing, outdoor urban setting, golden hour lighting, street photography style,
+high detail, professional photography
+```
+
+### Template 3: Fashion Editorial
+```
+editorial fashion portrait, stunning model, designer clothing, dramatic lighting,
+vogue style, high fashion, professional photography, medium format camera,
+ultra high resolution
+```
+
+## Consistency Tips
+
+1. **Always include age**: Specify "25 years old" or "mid-twenties" for consistency
+2. **Lighting description**: Always specify lighting type for consistent look
+3. **Quality markers**: Include "high quality", "professional photography", etc.
+4. **Avoid over-prompting**: Keep prompts concise but descriptive
+5. **Test variations**: Use same base with different style modifiers
+
+## Batch Generation Strategy
+
+For dataset creation, generate variations:
+1. Same base prompt + different angles (front, 3/4, profile)
+2. Same base prompt + different lighting (studio, natural, golden hour)
+3. Same base prompt + different expressions (smile, serious, laughing)
+4. Same base prompt + different outfits (business, casual, athletic)
+
+This ensures identity consistency while providing variety for LoRA training.

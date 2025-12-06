@@ -1,0 +1,44 @@
+{
+  "common_paths": {
+    "workspace": "/workspace",
+    "comfyui_locations": [
+      "/workspace/ComfyUI",
+      "/workspace/comfyui",
+      "/workspace/stable-diffusion-webui/extensions/ComfyUI",
+      "/comfyui",
+      "/app/ComfyUI",
+      "/runpod-volume/ComfyUI"
+    ],
+    "model_paths": {
+      "checkpoints": "models/checkpoints",
+      "loras": "models/loras",
+      "vae": "models/vae",
+      "embeddings": "models/embeddings",
+      "controlnet": "models/controlnet",
+      "upscale_models": "models/upscale_models",
+      "clip": "models/clip",
+      "clip_vision": "models/clip_vision"
+    },
+    "workflow_paths": [
+      "user/default/workflows",
+      "workflows",
+      "web/workflows",
+      "custom_workflows"
+    ],
+    "temp_directory": "/tmp",
+    "cache_directory": "/workspace/.cache"
+  },
+  "ports": {
+    "common": [8188, 3000, 8080, 7860, 5000, 8000],
+    "comfyui_default": 8188,
+    "jupyter": 8888,
+    "vscode": 8080,
+    "file_browser": 7777
+  },
+  "gpu_settings": {
+    "cuda_visible_devices": "0",
+    "low_vram_threshold_mb": 8000,
+    "medium_vram_threshold_mb": 12000,
+    "high_vram_threshold_mb": 24000
+  }
+}

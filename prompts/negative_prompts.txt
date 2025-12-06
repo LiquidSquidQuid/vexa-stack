@@ -1,0 +1,63 @@
+# Negative Prompts for Vexa Generation
+
+## Universal Negative (SDXL)
+```
+(worst quality:2), (low quality:2), (normal quality:2), lowres, blurry, text, watermark, logo, banner, extra digits, cropped, jpeg artifacts, signature, username, error, duplicate, ugly, monochrome, horror, geometry, mutation, disgusting
+```
+
+## Detailed Anatomy Negative
+```
+bad anatomy, bad hands, three hands, three legs, bad arms, missing legs, missing arms, poorly drawn face, bad face, fused face, cloned face, worst face, three crus, extra crus, fused crus, worst feet, three feet, fused feet, fused thigh, three thigh, fused thigh, extra thigh, worst thigh, missing fingers, extra fingers, ugly fingers, long fingers, horn, extra eyes, huge eyes, 2girl, amputation, disconnected limbs
+```
+
+## Style Negative (for photorealism)
+```
+cartoon, 3d, anime, sketch, painting, drawing, illustration, rendered, cgi, doll, figurine, sculpture, artwork, comic, manga, animated, toy, plasticine, claymation, pixar style, disney style
+```
+
+## Content Negative (SFW)
+```
+nsfw, nude, naked, explicit, sexual, provocative, revealing, lingerie, underwear, swimsuit, bikini, child, minor, underage, young, teen, kid
+```
+
+## Technical Negative
+```
+out of frame, out of focus, depth of field issues, motion blur, double exposure, overexposed, underexposed, bad lighting, harsh shadows, lens flare, chromatic aberration, noise, grain, artifacts
+```
+
+## Pony Diffusion Specific
+```
+score_4, score_5, score_6, source_pony, source_furry, source_cartoon, bad quality, low quality, text, watermark, signature, blurry, messy, low detail
+```
+
+## Recommended Combinations
+
+### For High-Quality Portraits
+```
+(worst quality:2), (low quality:2), lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, jpeg artifacts, signature, watermark, username, blurry, bad face, fused face, ugly, duplicate, mutated hands, poorly drawn face, deformed, bad proportions
+```
+
+### For Full Body Shots
+```
+bad anatomy, bad proportions, extra limbs, missing limbs, deformed limbs, missing arms, three arms, missing legs, three legs, extra fingers, fewer fingers, deformed fingers, long neck, bad hands, mutated hands, poorly drawn hands, blurry, cropped, out of frame, out of focus, signature, watermark
+```
+
+### For Fashion/Editorial
+```
+low quality, worst quality, amateur photography, snapshot, blurry, out of focus, bad lighting, overexposed, underexposed, bad composition, amateur model, bad posing, unnatural pose, stiff pose, cartoon, anime, 3d render, painting, sketch
+```
+
+## Weight Recommendations
+
+- Quality issues: weight 2.0
+- Anatomy issues: weight 1.5
+- Style issues: weight 1.0
+- Minor issues: weight 0.5
+
+## Usage Tips
+
+1. **Don't over-negative**: Too many negatives can limit creativity
+2. **Model-specific**: Different models respond differently to negatives
+3. **Test and adjust**: Start with basic negative and add as needed
+4. **Order matters**: Put most important negatives first
+5. **Use embeddings**: Consider negative embeddings like "negativeXL"

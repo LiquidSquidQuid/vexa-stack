@@ -59,16 +59,34 @@ fi
 
 mkdir -p "$TARGET_DIR"
 
-# Copy workflow files
+# Copy workflow files (including subdirectories)
 echo -e "\n${YELLOW}Copying workflows to: $TARGET_DIR${NC}"
+
+# Copy root-level JSON files
 for workflow_file in "$WORKFLOW_DIR"/*.json; do
     if [ -f "$workflow_file" ]; then
         filename=$(basename "$workflow_file")
         echo -e "  Copying: $filename"
         cp "$workflow_file" "$TARGET_DIR/"
-        
-        # Make the file readable by ComfyUI
         chmod 644 "$TARGET_DIR/$filename"
+    fi
+done
+
+# Copy subdirectories with their workflows
+for subdir in "$WORKFLOW_DIR"/*/; do
+    if [ -d "$subdir" ]; then
+        subdir_name=$(basename "$subdir")
+        echo -e "  Copying subdirectory: $subdir_name/"
+        mkdir -p "$TARGET_DIR/$subdir_name"
+
+        for workflow_file in "$subdir"*.json; do
+            if [ -f "$workflow_file" ]; then
+                filename=$(basename "$workflow_file")
+                echo -e "    - $filename"
+                cp "$workflow_file" "$TARGET_DIR/$subdir_name/"
+                chmod 644 "$TARGET_DIR/$subdir_name/$filename"
+            fi
+        done
     fi
 done
 
@@ -107,11 +125,23 @@ echo -e "\n${GREEN}=== Workflow Injection Complete ===${NC}"
 echo -e "Workflows available in: $TARGET_DIR"
 echo -e "\nIn ComfyUI UI:"
 echo -e "  1. Click 'Load' button"
-echo -e "  2. Look for workflows starting with 'vexa_'"
+echo -e "  2. Browse workflows or look for 'vexa_' prefixed ones"
 echo -e "\nWorkflows injected:"
 for workflow_file in "$WORKFLOW_DIR"/*.json; do
     if [ -f "$workflow_file" ]; then
         filename=$(basename "$workflow_file" .json)
         echo -e "  - $filename"
+    fi
+done
+for subdir in "$WORKFLOW_DIR"/*/; do
+    if [ -d "$subdir" ]; then
+        subdir_name=$(basename "$subdir")
+        echo -e "  [$subdir_name]"
+        for workflow_file in "$subdir"*.json; do
+            if [ -f "$workflow_file" ]; then
+                filename=$(basename "$workflow_file" .json)
+                echo -e "    - $filename"
+            fi
+        done
     fi
 done

@@ -51,9 +51,28 @@ The setup now supports downloading models from your Google Drive folder:
 - And more...
 
 ### Workflows
+**Root workflows:**
 - `vexa_sfw_dataset_gen` - Generate SFW training data
 - `vexa_image_to_video` - Convert images to video
-- Additional workflows from your collection
+- `Basic Wan 2_1` - Basic Wan 2.1 workflow
+- `Wan2.1 V3.2` - Wan 2.1 version 3.2
+- `wan21LowVramComfyUI` - Low VRAM optimized Wan 2.1
+- `FINAL Image to Video` - Finalized image to video workflow
+- `WanI2V-BySam` - Wan Image to Video by Sam
+- `Black Mixture` series - Advanced Wan 2.1 and Flux workflows
+- `XXX-Ray DMD2 Basic Workflow` - DMD2 basic workflow
+
+**Image to Video/ folder:**
+- `Hunyuan-img2vid` - Hunyuan image to video
+- `image to video` - Standard I2V workflow
+- `wan21LowVramComfyUI 2` - Low VRAM variant
+
+**Text to Image/ folder:**
+- `Aphrodite` - Aphrodite text to image
+- `BigLoveXL` - BigLoveXL workflow
+- `250319_MICKMUMPITZ_BASICFLUX+CN_V01` - Flux with ControlNet
+- `Black Mixture's Ultimate Flux V4` - Advanced Flux workflow
+- `XXX-Ray DMD2 Basic Workflow` - DMD2 text to image
 
 ## 🛠️ Manual Commands
 

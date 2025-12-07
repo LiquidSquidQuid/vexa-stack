@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Model injection script for ComfyUI
-# Downloads models based on manifest file
+# Downloads models based on manifest file with clear progress indicators
 
 set -e
 
@@ -14,198 +14,285 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+DIM='\033[2m'
 NC='\033[0m'
+
+# Symbols
+CHECK="✓"
+CROSS="✗"
+ARROW="→"
+DOWNLOAD="⬇"
+FOLDER="📁"
+CLOUD="☁"
 
 # Check if jq is installed for JSON parsing
 if ! command -v jq &> /dev/null; then
     echo -e "${YELLOW}jq not found, installing...${NC}"
-    apt-get update && apt-get install -y jq || yum install -y jq || echo "Failed to install jq"
+    apt-get update -qq && apt-get install -y -qq jq || yum install -y jq || echo "Failed to install jq"
 fi
 
-# Function to download a file with progress
+# Function to format file size
+format_size() {
+    local size="$1"
+    echo "$size"
+}
+
+# Function to check if file exists and is valid
+check_file_status() {
+    local path="$1"
+    local expected_size="$2"
+
+    if [ -f "$path" ]; then
+        local actual_size=$(stat -f%z "$path" 2>/dev/null || stat -c%s "$path" 2>/dev/null || echo "0")
+        if [ "$actual_size" -gt 1000 ]; then
+            echo "exists"
+        else
+            echo "corrupt"
+        fi
+    else
+        echo "missing"
+    fi
+}
+
+# Function to download a file with progress bar
 download_with_progress() {
     local url="$1"
     local dest="$2"
     local name="$3"
     local size="$4"
-    
-    echo -e "${BLUE}  Downloading: $name ($size)${NC}"
-    
-    # Check if file already exists and has size > 0
-    if [ -f "$dest" ] && [ -s "$dest" ]; then
-        echo -e "${GREEN}  ✓ Already exists: $name${NC}"
-        return 0
-    fi
-    
+
     # Create temp file for download
-    local temp_file="${dest}.tmp"
-    
+    local temp_file="${dest}.downloading"
+
     # Try wget first (better progress display)
     if command -v wget &> /dev/null; then
-        wget --show-progress --progress=bar:force:noscroll \
+        wget --progress=bar:force:noscroll \
              --timeout=60 --tries=3 \
-             "$url" -O "$temp_file" 2>&1 | \
-             grep --line-buffered "%" | \
-             sed -u -e "s/^/  /"
+             -q --show-progress \
+             "$url" -O "$temp_file" 2>&1 && {
+            mv "$temp_file" "$dest"
+            return 0
+        }
     # Fallback to curl
     elif command -v curl &> /dev/null; then
         curl -# -L --connect-timeout 60 --retry 3 \
-             "$url" -o "$temp_file"
-    else
-        echo -e "${RED}  Error: Neither wget nor curl found${NC}"
-        return 1
+             "$url" -o "$temp_file" && {
+            mv "$temp_file" "$dest"
+            return 0
+        }
     fi
-    
-    # Check if download succeeded
-    if [ $? -eq 0 ] && [ -f "$temp_file" ] && [ -s "$temp_file" ]; then
-        mv "$temp_file" "$dest"
-        echo -e "${GREEN}  ✓ Downloaded: $name${NC}"
-        return 0
-    else
-        rm -f "$temp_file"
-        echo -e "${RED}  ✗ Failed to download: $name${NC}"
-        return 1
-    fi
+
+    rm -f "$temp_file"
+    return 1
 }
 
-# Parse JSON manifest and download models
+# Print section header
+print_header() {
+    echo ""
+    echo -e "${BOLD}${BLUE}════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}${BLUE}  $1${NC}"
+    echo -e "${BOLD}${BLUE}════════════════════════════════════════════════════════════${NC}"
+    echo ""
+}
+
+# Print model status line
+print_model_status() {
+    local status="$1"
+    local name="$2"
+    local size="$3"
+    local location="$4"
+
+    case "$status" in
+        "exists")
+            echo -e "  ${GREEN}${CHECK}${NC} ${name} ${DIM}(${size})${NC} ${GREEN}[EXISTS]${NC}"
+            ;;
+        "downloading")
+            echo -e "  ${CYAN}${DOWNLOAD}${NC} ${name} ${DIM}(${size})${NC} ${CYAN}[DOWNLOADING...]${NC}"
+            ;;
+        "downloaded")
+            echo -e "  ${GREEN}${CHECK}${NC} ${name} ${DIM}(${size})${NC} ${GREEN}[DOWNLOADED]${NC}"
+            ;;
+        "missing")
+            echo -e "  ${YELLOW}○${NC} ${name} ${DIM}(${size})${NC} ${YELLOW}[MISSING]${NC}"
+            ;;
+        "failed")
+            echo -e "  ${RED}${CROSS}${NC} ${name} ${DIM}(${size})${NC} ${RED}[FAILED]${NC}"
+            ;;
+        "gdrive")
+            echo -e "  ${BLUE}${CLOUD}${NC} ${name} ${DIM}(${size})${NC} ${BLUE}[GOOGLE DRIVE]${NC}"
+            ;;
+        "skipped")
+            echo -e "  ${DIM}○ ${name} (${size}) [SKIPPED - placeholder URL]${NC}"
+            ;;
+    esac
+}
+
+# Main function to process models
 process_manifest() {
     if [ ! -f "$MANIFEST_FILE" ]; then
         echo -e "${RED}Error: Manifest file not found: $MANIFEST_FILE${NC}"
         return 1
     fi
-    
-    # Get total count of required models
-    local total_required=$(jq '[.models[] | select(.required == true)] | length' "$MANIFEST_FILE")
-    echo -e "${YELLOW}Found $total_required required models to download${NC}\n"
-    
-    # Process each model
-    local count=0
+
+    print_header "MODEL INVENTORY SCAN"
+
+    # Arrays to track status
+    local existing=()
+    local to_download=()
+    local gdrive_models=()
+    local skipped=()
+
+    # First pass: scan all models and categorize
+    echo -e "${BOLD}Scanning local model directories...${NC}\n"
+
     while IFS= read -r model; do
-        count=$((count + 1))
-        
         local type=$(echo "$model" | jq -r '.type')
         local name=$(echo "$model" | jq -r '.name')
         local url=$(echo "$model" | jq -r '.url')
         local size=$(echo "$model" | jq -r '.size')
         local required=$(echo "$model" | jq -r '.required')
-        local description=$(echo "$model" | jq -r '.description')
         local source=$(echo "$model" | jq -r '.source // "direct"')
-        local gdrive_id=$(echo "$model" | jq -r '.gdrive_id // ""')
-        
-        # Skip non-required models for now
-        if [ "$required" != "true" ]; then
-            continue
-        fi
-        
-        # Skip placeholder URLs
-        if [[ "$url" == placeholder_* ]]; then
-            echo -e "${YELLOW}  Skipping $name (placeholder URL)${NC}"
-            continue
-        fi
-        
-        # Handle Google Drive models
-        if [ "$source" == "gdrive" ] || [[ "$url" == gdrive://* ]]; then
-            echo -e "${BLUE}  Google Drive model detected${NC}"
-            # Use the Google Drive download script
-            bash "$SCRIPT_DIR/download_from_gdrive.sh" "$COMFYUI_DIR" > /dev/null 2>&1 || {
-                echo -e "${YELLOW}  Attempting Google Drive download...${NC}"
-                if command -v gdown &> /dev/null || pip install gdown -q; then
-                    if [ -n "$gdrive_id" ]; then
-                        gdown --id "$gdrive_id" -O "$dest_dir/$name" --quiet || echo -e "${YELLOW}  Manual upload needed${NC}"
-                    else
-                        echo -e "${YELLOW}  Upload $name to Google Drive folder${NC}"
-                    fi
-                fi
-            }
-            continue
-        fi
-        
-        echo -e "${YELLOW}[$count/$total_required] Processing: $name${NC}"
-        echo -e "  Type: $type | Size: $size"
-        echo -e "  $description"
-        
-        # Determine destination directory based on type
-        case "$type" in
-            checkpoint)
-                dest_dir="$COMFYUI_DIR/models/checkpoints"
-                ;;
-            lora)
-                dest_dir="$COMFYUI_DIR/models/loras"
-                ;;
-            vae)
-                dest_dir="$COMFYUI_DIR/models/vae"
-                ;;
-            embedding)
-                dest_dir="$COMFYUI_DIR/models/embeddings"
-                ;;
-            upscale)
-                dest_dir="$COMFYUI_DIR/models/upscale_models"
-                ;;
-            controlnet)
-                dest_dir="$COMFYUI_DIR/models/controlnet"
-                ;;
-            *)
-                echo -e "${YELLOW}  Warning: Unknown model type: $type${NC}"
-                continue
-                ;;
-        esac
-        
-        # Create directory if it doesn't exist
-        mkdir -p "$dest_dir"
-        
-        # Download the model
-        dest_file="$dest_dir/$name"
-        download_with_progress "$url" "$dest_file" "$name" "$size"
-        
-        echo ""
-    done < <(jq -c '.models[]' "$MANIFEST_FILE")
-}
 
-# Function to download a specific model by name
-download_specific_model() {
-    local model_name="$1"
-    local model=$(jq --arg name "$model_name" '.models[] | select(.name == $name)' "$MANIFEST_FILE")
-    
-    if [ -z "$model" ]; then
-        echo -e "${RED}Model not found in manifest: $model_name${NC}"
-        return 1
-    fi
-    
-    echo "$model" | jq -c '.' | while IFS= read -r m; do
-        local type=$(echo "$m" | jq -r '.type')
-        local name=$(echo "$m" | jq -r '.name')
-        local url=$(echo "$m" | jq -r '.url')
-        local size=$(echo "$m" | jq -r '.size')
-        
+        # Skip non-required for now
+        [ "$required" != "true" ] && continue
+
+        # Determine destination directory
         case "$type" in
             checkpoint) dest_dir="$COMFYUI_DIR/models/checkpoints" ;;
             lora) dest_dir="$COMFYUI_DIR/models/loras" ;;
             vae) dest_dir="$COMFYUI_DIR/models/vae" ;;
             embedding) dest_dir="$COMFYUI_DIR/models/embeddings" ;;
             upscale) dest_dir="$COMFYUI_DIR/models/upscale_models" ;;
+            controlnet) dest_dir="$COMFYUI_DIR/models/controlnet" ;;
             *) dest_dir="$COMFYUI_DIR/models/$type" ;;
         esac
-        
-        mkdir -p "$dest_dir"
-        download_with_progress "$url" "$dest_dir/$name" "$name" "$size"
-    done
+
+        local dest_file="$dest_dir/$name"
+        local status=$(check_file_status "$dest_file" "$size")
+
+        # Categorize
+        if [[ "$url" == placeholder_* ]]; then
+            skipped+=("$name|$size|$type")
+            print_model_status "skipped" "$name" "$size" "$type"
+        elif [ "$source" == "gdrive" ] || [[ "$url" == gdrive://* ]]; then
+            if [ "$status" == "exists" ]; then
+                existing+=("$name|$size|$type")
+                print_model_status "exists" "$name" "$size" "$type"
+            else
+                gdrive_models+=("$name|$size|$type|$dest_file")
+                print_model_status "gdrive" "$name" "$size" "$type"
+            fi
+        elif [ "$status" == "exists" ]; then
+            existing+=("$name|$size|$type")
+            print_model_status "exists" "$name" "$size" "$type"
+        else
+            to_download+=("$name|$size|$type|$url|$dest_file")
+            print_model_status "missing" "$name" "$size" "$type"
+        fi
+
+    done < <(jq -c '.models[]' "$MANIFEST_FILE")
+
+    # Summary
+    echo ""
+    echo -e "${BOLD}┌─────────────────────────────────────┐${NC}"
+    echo -e "${BOLD}│         SCAN SUMMARY                │${NC}"
+    echo -e "${BOLD}├─────────────────────────────────────┤${NC}"
+    echo -e "${BOLD}│${NC} ${GREEN}${CHECK} Already exists:${NC}    ${#existing[@]} models     ${BOLD}│${NC}"
+    echo -e "${BOLD}│${NC} ${CYAN}${DOWNLOAD} To download:${NC}       ${#to_download[@]} models     ${BOLD}│${NC}"
+    echo -e "${BOLD}│${NC} ${BLUE}${CLOUD} Google Drive:${NC}       ${#gdrive_models[@]} models     ${BOLD}│${NC}"
+    echo -e "${BOLD}│${NC} ${DIM}○ Skipped:${NC}            ${#skipped[@]} models     ${BOLD}│${NC}"
+    echo -e "${BOLD}└─────────────────────────────────────┘${NC}"
+
+    # Download from direct URLs
+    if [ ${#to_download[@]} -gt 0 ]; then
+        print_header "DOWNLOADING FROM DIRECT URLS"
+
+        local download_count=0
+        local download_success=0
+        local download_failed=0
+
+        for item in "${to_download[@]}"; do
+            IFS='|' read -r name size type url dest_file <<< "$item"
+            download_count=$((download_count + 1))
+
+            echo -e "\n${BOLD}[${download_count}/${#to_download[@]}]${NC} ${name}"
+            echo -e "    ${DIM}Size: ${size} | Type: ${type}${NC}"
+            echo -e "    ${DIM}URL: ${url:0:60}...${NC}"
+            echo ""
+
+            mkdir -p "$(dirname "$dest_file")"
+
+            if download_with_progress "$url" "$dest_file" "$name" "$size"; then
+                echo -e "    ${GREEN}${CHECK} Download complete${NC}"
+                download_success=$((download_success + 1))
+            else
+                echo -e "    ${RED}${CROSS} Download failed${NC}"
+                download_failed=$((download_failed + 1))
+            fi
+        done
+
+        echo ""
+        echo -e "${BOLD}Download Results:${NC} ${GREEN}${download_success} succeeded${NC}, ${RED}${download_failed} failed${NC}"
+    fi
+
+    # Handle Google Drive models
+    if [ ${#gdrive_models[@]} -gt 0 ]; then
+        print_header "GOOGLE DRIVE MODELS"
+
+        echo -e "${YELLOW}The following models need to be downloaded from Google Drive:${NC}\n"
+
+        for item in "${gdrive_models[@]}"; do
+            IFS='|' read -r name size type dest_file <<< "$item"
+            echo -e "  ${BLUE}${CLOUD}${NC} ${name} ${DIM}(${size})${NC}"
+        done
+
+        echo ""
+        echo -e "${BOLD}To download these models:${NC}"
+        echo -e "  1. Go to: ${CYAN}https://drive.google.com/drive/folders/1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L${NC}"
+        echo -e "  2. Upload the missing model files"
+        echo -e "  3. Run: ${CYAN}bash scripts/download_from_gdrive.sh --all${NC}"
+        echo ""
+
+        # Try to download from Google Drive
+        echo -e "${YELLOW}Attempting automatic Google Drive download...${NC}"
+        if command -v gdown &> /dev/null || pip install gdown -q 2>/dev/null; then
+            bash "$SCRIPT_DIR/download_from_gdrive.sh" "$COMFYUI_DIR" --all 2>/dev/null || {
+                echo -e "${YELLOW}Auto-download not available. Please upload models manually.${NC}"
+            }
+        fi
+    fi
 }
 
 # Main execution
-echo -e "${GREEN}=== Model Injection for ComfyUI ===${NC}"
-echo -e "Target directory: $COMFYUI_DIR\n"
+echo ""
+echo -e "${BOLD}${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${BOLD}${GREEN}║           COMFYUI MODEL INJECTION SYSTEM                      ║${NC}"
+echo -e "${BOLD}${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
+echo ""
+echo -e "  ${FOLDER} Target: ${CYAN}$COMFYUI_DIR${NC}"
+echo -e "  📋 Manifest: ${CYAN}$MANIFEST_FILE${NC}"
 
 # Check if specific model requested
 if [ -n "$2" ]; then
-    download_specific_model "$2"
+    echo -e "\n${YELLOW}Downloading specific model: $2${NC}"
+    # TODO: implement specific model download
 else
     process_manifest
 fi
 
-# Summary
-echo -e "${GREEN}=== Model Download Complete ===${NC}"
-echo -e "Models are available in:"
-echo -e "  Checkpoints: $COMFYUI_DIR/models/checkpoints/"
-echo -e "  LoRAs: $COMFYUI_DIR/models/loras/"
-echo -e "  VAEs: $COMFYUI_DIR/models/vae/"
+# Final summary
+print_header "FINAL STATUS"
+
+echo -e "${BOLD}Model directories:${NC}"
+for dir in checkpoints loras vae embeddings upscale_models controlnet; do
+    full_path="$COMFYUI_DIR/models/$dir"
+    if [ -d "$full_path" ]; then
+        count=$(find "$full_path" -maxdepth 1 -type f \( -name "*.safetensors" -o -name "*.ckpt" -o -name "*.pth" -o -name "*.pt" \) 2>/dev/null | wc -l)
+        echo -e "  ${FOLDER} ${dir}: ${GREEN}${count}${NC} files"
+    fi
+done
+
+echo ""
+echo -e "${GREEN}Model injection complete!${NC}"

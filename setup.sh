@@ -35,6 +35,23 @@ fi
 echo -e "${GREEN}✓ Found ComfyUI at: $COMFYUI_DIR${NC}"
 echo -e "${GREEN}✓ ComfyUI running on port: $COMFYUI_PORT${NC}"
 
+# Update ComfyUI to latest version
+echo -e "\n${YELLOW}Updating ComfyUI to latest version...${NC}"
+cd "$COMFYUI_DIR"
+git pull origin master || git pull origin main || {
+    echo -e "${YELLOW}Warning: Could not update ComfyUI (not a git repo or no internet)${NC}"
+}
+
+# Update ComfyUI dependencies
+if [ -f "requirements.txt" ]; then
+    echo -e "${YELLOW}Updating ComfyUI dependencies...${NC}"
+    pip install -r requirements.txt -q || {
+        echo -e "${YELLOW}Warning: Some dependencies may have failed to install${NC}"
+    }
+fi
+cd - > /dev/null
+echo -e "${GREEN}✓ ComfyUI updated${NC}"
+
 # Detect GPU
 GPU_INFO=$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || echo "No GPU detected")
 echo -e "${GREEN}✓ GPU: $GPU_INFO${NC}"

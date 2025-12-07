@@ -122,29 +122,60 @@ install_gdown() {
     return 0
 }
 
-# Download with retry logic
-download_with_retry() {
+# Get list of files in folder
+get_folder_file_list() {
+    # Use gdown to list folder contents and extract file IDs and names
+    gdown --folder --id "$DRIVE_FOLDER_ID" --dry-run 2>&1 | grep "Processing file" | while read -r line; do
+        # Extract file ID and name from "Processing file <id> <name>"
+        file_id=$(echo "$line" | awk '{print $3}')
+        file_name=$(echo "$line" | awk '{$1=$2=$3=""; print $0}' | sed 's/^[ ]*//')
+        echo "$file_id|$file_name"
+    done
+}
+
+# Download single file with retry
+download_single_file() {
+    local file_id="$1"
+    local file_name="$2"
+    local dest_dir="$3"
     local attempt=1
-    local temp_dir="$1"
+    local delay=$RETRY_DELAY
 
-    while [ $attempt -le $MAX_RETRIES ]; do
-        echo -e "${CYAN}${DOWNLOAD} Download attempt $attempt of $MAX_RETRIES...${NC}"
+    local dest_path="$dest_dir/$file_name"
 
-        # Try to download the folder
-        if gdown --folder --id "$DRIVE_FOLDER_ID" -O "$temp_dir" 2>&1; then
+    # Check if already exists
+    if [ -f "$dest_path" ] && [ -s "$dest_path" ]; then
+        local size=$(stat -c%s "$dest_path" 2>/dev/null || stat -f%z "$dest_path" 2>/dev/null || echo "0")
+        if [ "$size" -gt 1000 ]; then
+            echo -e "  ${DIM}○ ${file_name} - already exists, skipping${NC}"
             return 0
         fi
+    fi
 
-        # Check if it's a rate limit error
+    while [ $attempt -le $MAX_RETRIES ]; do
+        echo -e "  ${CYAN}${DOWNLOAD}${NC} ${file_name} ${DIM}(attempt $attempt/$MAX_RETRIES)${NC}"
+
+        # Try to download the file
+        if gdown --id "$file_id" -O "$dest_path" 2>&1; then
+            # Verify download succeeded
+            if [ -f "$dest_path" ] && [ -s "$dest_path" ]; then
+                echo -e "  ${GREEN}${CHECK}${NC} ${file_name} downloaded successfully"
+                return 0
+            fi
+        fi
+
+        # Check if rate limited and retry
         if [ $attempt -lt $MAX_RETRIES ]; then
-            echo -e "${YELLOW}Download may have been rate-limited. Waiting ${RETRY_DELAY}s before retry...${NC}"
-            sleep $RETRY_DELAY
-            RETRY_DELAY=$((RETRY_DELAY * 2))  # Exponential backoff
+            echo -e "  ${YELLOW}Rate limited. Waiting ${delay}s before retry...${NC}"
+            sleep $delay
+            delay=$((delay * 2))
         fi
 
         attempt=$((attempt + 1))
     done
 
+    echo -e "  ${RED}${CROSS}${NC} ${file_name} - failed after $MAX_RETRIES attempts"
+    echo -e "      ${DIM}Manual download: https://drive.google.com/uc?id=${file_id}${NC}"
     return 1
 }
 
@@ -159,77 +190,93 @@ sync_from_gdrive() {
     # Install gdown
     install_gdown || return 1
 
-    # Create temp directory
-    local temp_dir="/tmp/gdrive_sync_$$"
-    mkdir -p "$temp_dir"
-
-    # Download folder contents
-    print_header "DOWNLOADING FROM GOOGLE DRIVE"
+    # Get file list from folder
+    print_header "SCANNING GOOGLE DRIVE FOLDER"
 
     echo -e "${YELLOW}Fetching file list from Google Drive...${NC}"
-    echo -e "${DIM}(This may take a moment for large folders)${NC}"
     echo ""
 
-    if ! download_with_retry "$temp_dir"; then
-        echo -e "${RED}${CROSS} Failed to download from Google Drive after $MAX_RETRIES attempts${NC}"
+    # Get list of files
+    local file_list=$(gdown --folder --id "$DRIVE_FOLDER_ID" --dry-run 2>&1 | grep "Processing file" || true)
+
+    if [ -z "$file_list" ]; then
+        echo -e "${RED}${CROSS} Could not retrieve file list from Google Drive${NC}"
         echo -e "${YELLOW}This might be due to:${NC}"
-        echo -e "  - Too many recent downloads (rate limiting)"
-        echo -e "  - Network issues"
         echo -e "  - Folder sharing permissions"
+        echo -e "  - Network issues"
         echo ""
-        echo -e "Try again later or download manually from:"
-        echo -e "  ${CYAN}https://drive.google.com/drive/folders/$DRIVE_FOLDER_ID${NC}"
-        rm -rf "$temp_dir"
+        echo -e "Make sure the folder is shared as 'Anyone with the link can view'"
         return 1
     fi
 
-    # Process downloaded files
-    print_header "SORTING DOWNLOADED FILES"
+    # Parse and display files
+    echo -e "${BOLD}Files found in Google Drive:${NC}\n"
 
-    # Count files by type
-    local checkpoint_count=0
-    local lora_count=0
-    local vae_count=0
-    local other_count=0
-    local total_count=0
-    local skipped_count=0
+    local total_files=0
+    local success_count=0
+    local skip_count=0
+    local fail_count=0
 
-    # Find all downloaded files
-    echo -e "${BOLD}Processing downloaded files...${NC}\n"
+    # Store file info for processing
+    declare -a files_to_process
 
-    find "$temp_dir" -type f \( -name "*.safetensors" -o -name "*.ckpt" -o -name "*.pt" -o -name "*.pth" -o -name "*.json" \) | while read -r file; do
-        filename=$(basename "$file")
-        dest_dir=$(get_destination_dir "$filename")
-        type_name=$(get_type_name "$dest_dir")
-        dest_path="$dest_dir/$filename"
+    while IFS= read -r line; do
+        if [[ "$line" == *"Processing file"* ]]; then
+            file_id=$(echo "$line" | awk '{print $3}')
+            file_name=$(echo "$line" | sed 's/Processing file [^ ]* //')
+
+            # Determine destination
+            dest_dir=$(get_destination_dir "$file_name")
+            type_name=$(get_type_name "$dest_dir")
+
+            echo -e "  ${BLUE}${CLOUD}${NC} ${file_name}"
+            echo -e "      ${ARROW} ${type_name}"
+
+            files_to_process+=("$file_id|$file_name|$dest_dir|$type_name")
+            total_files=$((total_files + 1))
+        fi
+    done <<< "$file_list"
+
+    echo ""
+    echo -e "${BOLD}Total files to process: ${total_files}${NC}"
+
+    # Download files individually
+    print_header "DOWNLOADING FILES"
+
+    local current=0
+    for file_info in "${files_to_process[@]}"; do
+        IFS='|' read -r file_id file_name dest_dir type_name <<< "$file_info"
+        current=$((current + 1))
+
+        echo -e "\n${BOLD}[${current}/${total_files}]${NC} ${file_name} ${DIM}(${type_name})${NC}"
 
         # Create destination directory
         mkdir -p "$dest_dir"
 
-        # Check if file already exists
-        if [ -f "$dest_path" ]; then
-            local existing_size=$(stat -c%s "$dest_path" 2>/dev/null || stat -f%z "$dest_path" 2>/dev/null || echo "0")
-            local new_size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo "0")
-
-            if [ "$existing_size" -eq "$new_size" ]; then
-                echo -e "  ${DIM}○ ${filename} [${type_name}] - already exists, skipping${NC}"
-                continue
+        # Download the file
+        if download_single_file "$file_id" "$file_name" "$dest_dir"; then
+            success_count=$((success_count + 1))
+        else
+            # Check if it was skipped (already exists)
+            if [ -f "$dest_dir/$file_name" ] && [ -s "$dest_dir/$file_name" ]; then
+                skip_count=$((skip_count + 1))
+            else
+                fail_count=$((fail_count + 1))
             fi
         fi
-
-        # Move file to destination
-        echo -e "  ${GREEN}${CHECK}${NC} ${filename}"
-        echo -e "      ${ARROW} ${type_name}: ${DIM}${dest_dir}${NC}"
-        mv "$file" "$dest_path"
-
     done
-
-    # Cleanup
-    rm -rf "$temp_dir"
 
     # Final summary
     print_header "SYNC COMPLETE"
 
+    echo -e "${BOLD}Download Summary:${NC}"
+    echo -e "  ${GREEN}${CHECK} Downloaded:${NC} ${success_count} files"
+    echo -e "  ${DIM}○ Skipped:${NC} ${skip_count} files (already exist)"
+    if [ $fail_count -gt 0 ]; then
+        echo -e "  ${RED}${CROSS} Failed:${NC} ${fail_count} files"
+    fi
+
+    echo ""
     echo -e "${BOLD}Files in each directory:${NC}"
     for dir in checkpoints loras vae embeddings upscale_models controlnet clip; do
         full_path="$COMFYUI_DIR/models/$dir"
@@ -242,7 +289,13 @@ sync_from_gdrive() {
     done
 
     echo ""
-    echo -e "${GREEN}${CHECK} Google Drive sync complete!${NC}"
+    if [ $fail_count -gt 0 ]; then
+        echo -e "${YELLOW}Some files failed to download due to rate limiting.${NC}"
+        echo -e "You can retry later or download manually from:"
+        echo -e "  ${CYAN}https://drive.google.com/drive/folders/$DRIVE_FOLDER_ID${NC}"
+    else
+        echo -e "${GREEN}${CHECK} Google Drive sync complete!${NC}"
+    fi
 }
 
 # Show help

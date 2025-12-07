@@ -1,207 +1,280 @@
 #!/bin/bash
 
-# Google Drive model download script for ComfyUI
-# Downloads models from your Google Drive folder to ComfyUI
-
-set -e
+# Google Drive Model Sync for ComfyUI
+# Automatically downloads ALL files from Drive folder and sorts them intelligently
 
 COMFYUI_DIR="${1:-/workspace/ComfyUI}"
-DRIVE_FOLDER_ID="${2:-1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L}"  # Your Drive folder
+DRIVE_FOLDER_ID="1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L"
 
-# Colors
+# Colors and symbols
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+DIM='\033[2m'
 NC='\033[0m'
 
-echo -e "${GREEN}=== Google Drive Model Downloader ===${NC}"
-echo -e "Drive Folder: https://drive.google.com/drive/folders/$DRIVE_FOLDER_ID"
+CHECK="✓"
+CROSS="✗"
+CLOUD="☁"
+ARROW="→"
+DOWNLOAD="⬇"
 
-# Install gdown if not present
+# Retry settings
+MAX_RETRIES=3
+RETRY_DELAY=30
+
+# Print header
+print_header() {
+    echo ""
+    echo -e "${BOLD}${BLUE}════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}${BLUE}  $1${NC}"
+    echo -e "${BOLD}${BLUE}════════════════════════════════════════════════════════════${NC}"
+    echo ""
+}
+
+# Determine destination directory based on filename
+get_destination_dir() {
+    local filename="$1"
+    local filename_lower=$(echo "$filename" | tr '[:upper:]' '[:lower:]')
+
+    # LoRA patterns
+    if [[ "$filename_lower" == *"lora"* ]] || [[ "$filename_lower" == *"_lo_"* ]]; then
+        echo "$COMFYUI_DIR/models/loras"
+        return
+    fi
+
+    # VAE patterns
+    if [[ "$filename_lower" == *"vae"* ]]; then
+        echo "$COMFYUI_DIR/models/vae"
+        return
+    fi
+
+    # Embedding patterns
+    if [[ "$filename_lower" == *"embedding"* ]] || [[ "$filename_lower" == *"embed"* ]] || [[ "$filename_lower" == *"textual_inversion"* ]]; then
+        echo "$COMFYUI_DIR/models/embeddings"
+        return
+    fi
+
+    # Upscaler patterns
+    if [[ "$filename_lower" == *"upscale"* ]] || [[ "$filename_lower" == *"esrgan"* ]] || [[ "$filename_lower" == *"4x"* ]] || [[ "$filename_lower" == *"2x"* ]]; then
+        echo "$COMFYUI_DIR/models/upscale_models"
+        return
+    fi
+
+    # ControlNet patterns
+    if [[ "$filename_lower" == *"controlnet"* ]] || [[ "$filename_lower" == *"control_"* ]] || [[ "$filename_lower" == *"cn_"* ]]; then
+        echo "$COMFYUI_DIR/models/controlnet"
+        return
+    fi
+
+    # CLIP patterns
+    if [[ "$filename_lower" == *"clip"* ]] || [[ "$filename_lower" == *"text_encoder"* ]]; then
+        echo "$COMFYUI_DIR/models/clip"
+        return
+    fi
+
+    # Workflow JSON files
+    if [[ "$filename" == *.json ]]; then
+        echo "$COMFYUI_DIR/user/default/workflows"
+        return
+    fi
+
+    # Default: checkpoints for .safetensors and .ckpt
+    if [[ "$filename" == *.safetensors ]] || [[ "$filename" == *.ckpt ]]; then
+        echo "$COMFYUI_DIR/models/checkpoints"
+        return
+    fi
+
+    # Other files go to a misc folder
+    echo "$COMFYUI_DIR/models/other"
+}
+
+# Get friendly type name for display
+get_type_name() {
+    local dest_dir="$1"
+    case "$dest_dir" in
+        *"/loras"*) echo "LoRA" ;;
+        *"/vae"*) echo "VAE" ;;
+        *"/embeddings"*) echo "Embedding" ;;
+        *"/upscale_models"*) echo "Upscaler" ;;
+        *"/controlnet"*) echo "ControlNet" ;;
+        *"/clip"*) echo "CLIP" ;;
+        *"/workflows"*) echo "Workflow" ;;
+        *"/checkpoints"*) echo "Checkpoint" ;;
+        *) echo "Other" ;;
+    esac
+}
+
+# Install gdown if needed
 install_gdown() {
     if ! command -v gdown &> /dev/null; then
         echo -e "${YELLOW}Installing gdown...${NC}"
-        pip install --upgrade --no-cache-dir gdown -q || {
+        pip install --upgrade --no-cache-dir gdown -q 2>/dev/null || {
             echo -e "${RED}Failed to install gdown${NC}"
             echo "Try: pip install gdown"
-            exit 1
-        }
-    fi
-    echo -e "${GREEN}✓ gdown is installed${NC}"
-}
-
-# Download file from Google Drive
-download_from_drive() {
-    local file_id="$1"
-    local output_path="$2"
-    local file_name="$3"
-    
-    echo -e "${BLUE}Downloading: $file_name${NC}"
-    
-    # Check if file already exists
-    if [ -f "$output_path" ] && [ -s "$output_path" ]; then
-        echo -e "${GREEN}  ✓ Already exists: $file_name${NC}"
-        return 0
-    fi
-    
-    # Create directory if needed
-    mkdir -p "$(dirname "$output_path")"
-    
-    # Download with gdown
-    if [ -n "$file_id" ]; then
-        # Direct file download
-        echo -e "  Downloading from file ID: $file_id"
-        gdown --id "$file_id" -O "$output_path" --quiet || {
-            echo -e "${RED}  ✗ Failed to download: $file_name${NC}"
-            return 1
-        }
-    else
-        # Try fuzzy matching by name
-        echo -e "  Searching in Drive folder for: $file_name"
-        gdown --folder --id "$DRIVE_FOLDER_ID" -O "$(dirname "$output_path")" --quiet || {
-            echo -e "${RED}  ✗ Failed to download from folder${NC}"
             return 1
         }
     fi
-    
-    if [ -f "$output_path" ]; then
-        echo -e "${GREEN}  ✓ Downloaded: $file_name${NC}"
-        return 0
-    else
-        echo -e "${RED}  ✗ Download failed: $file_name${NC}"
-        return 1
-    fi
+    echo -e "${GREEN}${CHECK} gdown is ready${NC}"
+    return 0
 }
 
-# Download entire folder
-download_folder() {
-    local folder_id="$1"
-    local output_dir="$2"
-    
-    echo -e "${YELLOW}Downloading entire folder...${NC}"
-    mkdir -p "$output_dir"
-    
-    # Use gdown to download folder
-    gdown --folder --id "$folder_id" -O "$output_dir" || {
-        echo -e "${RED}Failed to download folder${NC}"
-        return 1
-    }
-    
-    echo -e "${GREEN}✓ Folder downloaded${NC}"
-}
+# Download with retry logic
+download_with_retry() {
+    local attempt=1
+    local temp_dir="$1"
 
-# Main download function
-download_models() {
-    # Install gdown first
-    install_gdown
-    
-    # Model configurations
-    # Format: "file_id|output_path|name"
-    local models=(
-        # Checkpoints - update these with actual file IDs from your Drive
-        "|$COMFYUI_DIR/models/checkpoints/ponyRealism_v22MainVAE.safetensors|Pony Realism v2.2"
-        "|$COMFYUI_DIR/models/checkpoints/RealVisXL_V5.0_Lightning_fp16.safetensors|RealVisXL V5"
-        
-        # LoRAs
-        "|$COMFYUI_DIR/models/loras/detail_enhancer_xl.safetensors|Detail Enhancer XL"
-        "|$COMFYUI_DIR/models/loras/add-detail-xl.safetensors|Add Detail XL"
-        
-        # VAE
-        "|$COMFYUI_DIR/models/vae/sdxl_vae.safetensors|SDXL VAE"
-    )
-    
-    echo -e "\n${YELLOW}Downloading models from Google Drive...${NC}"
-    
-    local success=0
-    local failed=0
-    
-    for model_config in "${models[@]}"; do
-        IFS='|' read -r file_id output_path name <<< "$model_config"
-        
-        if download_from_drive "$file_id" "$output_path" "$name"; then
-            ((success++))
-        else
-            ((failed++))
+    while [ $attempt -le $MAX_RETRIES ]; do
+        echo -e "${CYAN}${DOWNLOAD} Download attempt $attempt of $MAX_RETRIES...${NC}"
+
+        # Try to download the folder
+        if gdown --folder --id "$DRIVE_FOLDER_ID" -O "$temp_dir" 2>&1; then
+            return 0
         fi
-        echo ""
+
+        # Check if it's a rate limit error
+        if [ $attempt -lt $MAX_RETRIES ]; then
+            echo -e "${YELLOW}Download may have been rate-limited. Waiting ${RETRY_DELAY}s before retry...${NC}"
+            sleep $RETRY_DELAY
+            RETRY_DELAY=$((RETRY_DELAY * 2))  # Exponential backoff
+        fi
+
+        attempt=$((attempt + 1))
     done
-    
-    # Summary
-    echo -e "${GREEN}=== Download Summary ===${NC}"
-    echo -e "Successfully downloaded: $success models"
-    if [ $failed -gt 0 ]; then
-        echo -e "${YELLOW}Failed downloads: $failed models${NC}"
-        echo -e "\nTo manually download models:"
-        echo -e "1. Upload them to: https://drive.google.com/drive/folders/$DRIVE_FOLDER_ID"
-        echo -e "2. Get the file ID (right-click → Get link → extract ID)"
-        echo -e "3. Update this script with the file IDs"
-    fi
+
+    return 1
 }
 
-# Alternative: Download all from folder
-download_all_from_folder() {
-    echo -e "${YELLOW}Downloading all models from Drive folder...${NC}"
-    
+# Main sync function
+sync_from_gdrive() {
+    print_header "GOOGLE DRIVE MODEL SYNC"
+
+    echo -e "  ${CLOUD} Drive Folder: ${CYAN}https://drive.google.com/drive/folders/$DRIVE_FOLDER_ID${NC}"
+    echo -e "  📁 Target: ${CYAN}$COMFYUI_DIR${NC}"
+    echo ""
+
+    # Install gdown
+    install_gdown || return 1
+
     # Create temp directory
-    local temp_dir="/tmp/gdrive_models"
+    local temp_dir="/tmp/gdrive_sync_$$"
     mkdir -p "$temp_dir"
-    
-    # Download entire folder
-    gdown --folder --id "$DRIVE_FOLDER_ID" -O "$temp_dir" || {
-        echo -e "${RED}Failed to download folder${NC}"
+
+    # Download folder contents
+    print_header "DOWNLOADING FROM GOOGLE DRIVE"
+
+    echo -e "${YELLOW}Fetching file list from Google Drive...${NC}"
+    echo -e "${DIM}(This may take a moment for large folders)${NC}"
+    echo ""
+
+    if ! download_with_retry "$temp_dir"; then
+        echo -e "${RED}${CROSS} Failed to download from Google Drive after $MAX_RETRIES attempts${NC}"
+        echo -e "${YELLOW}This might be due to:${NC}"
+        echo -e "  - Too many recent downloads (rate limiting)"
+        echo -e "  - Network issues"
+        echo -e "  - Folder sharing permissions"
+        echo ""
+        echo -e "Try again later or download manually from:"
+        echo -e "  ${CYAN}https://drive.google.com/drive/folders/$DRIVE_FOLDER_ID${NC}"
+        rm -rf "$temp_dir"
         return 1
-    }
-    
-    # Move files to appropriate directories
-    echo -e "${YELLOW}Organizing downloaded models...${NC}"
-    
-    # Move checkpoints
-    find "$temp_dir" -name "*.safetensors" -o -name "*.ckpt" | while read -r file; do
+    fi
+
+    # Process downloaded files
+    print_header "SORTING DOWNLOADED FILES"
+
+    # Count files by type
+    local checkpoint_count=0
+    local lora_count=0
+    local vae_count=0
+    local other_count=0
+    local total_count=0
+    local skipped_count=0
+
+    # Find all downloaded files
+    echo -e "${BOLD}Processing downloaded files...${NC}\n"
+
+    find "$temp_dir" -type f \( -name "*.safetensors" -o -name "*.ckpt" -o -name "*.pt" -o -name "*.pth" -o -name "*.json" \) | while read -r file; do
         filename=$(basename "$file")
-        
-        # Determine destination based on filename patterns
-        if [[ "$filename" == *"lora"* ]] || [[ "$filename" == *"LoRA"* ]]; then
-            mv "$file" "$COMFYUI_DIR/models/loras/" 2>/dev/null || true
-            echo "  Moved to LoRAs: $filename"
-        elif [[ "$filename" == *"vae"* ]] || [[ "$filename" == *"VAE"* ]]; then
-            mv "$file" "$COMFYUI_DIR/models/vae/" 2>/dev/null || true
-            echo "  Moved to VAE: $filename"
-        else
-            mv "$file" "$COMFYUI_DIR/models/checkpoints/" 2>/dev/null || true
-            echo "  Moved to checkpoints: $filename"
+        dest_dir=$(get_destination_dir "$filename")
+        type_name=$(get_type_name "$dest_dir")
+        dest_path="$dest_dir/$filename"
+
+        # Create destination directory
+        mkdir -p "$dest_dir"
+
+        # Check if file already exists
+        if [ -f "$dest_path" ]; then
+            local existing_size=$(stat -c%s "$dest_path" 2>/dev/null || stat -f%z "$dest_path" 2>/dev/null || echo "0")
+            local new_size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo "0")
+
+            if [ "$existing_size" -eq "$new_size" ]; then
+                echo -e "  ${DIM}○ ${filename} [${type_name}] - already exists, skipping${NC}"
+                continue
+            fi
         fi
+
+        # Move file to destination
+        echo -e "  ${GREEN}${CHECK}${NC} ${filename}"
+        echo -e "      ${ARROW} ${type_name}: ${DIM}${dest_dir}${NC}"
+        mv "$file" "$dest_path"
+
     done
-    
+
     # Cleanup
     rm -rf "$temp_dir"
-    echo -e "${GREEN}✓ Models organized${NC}"
+
+    # Final summary
+    print_header "SYNC COMPLETE"
+
+    echo -e "${BOLD}Files in each directory:${NC}"
+    for dir in checkpoints loras vae embeddings upscale_models controlnet clip; do
+        full_path="$COMFYUI_DIR/models/$dir"
+        if [ -d "$full_path" ]; then
+            count=$(find "$full_path" -maxdepth 1 -type f \( -name "*.safetensors" -o -name "*.ckpt" -o -name "*.pt" -o -name "*.pth" \) 2>/dev/null | wc -l)
+            if [ "$count" -gt 0 ]; then
+                echo -e "  📁 ${dir}: ${GREEN}${count}${NC} files"
+            fi
+        fi
+    done
+
+    echo ""
+    echo -e "${GREEN}${CHECK} Google Drive sync complete!${NC}"
 }
 
-# Help function
+# Show help
 show_help() {
-    echo "Usage: $0 [COMFYUI_DIR] [DRIVE_FOLDER_ID]"
+    echo "Google Drive Model Sync for ComfyUI"
     echo ""
-    echo "Downloads models from Google Drive to ComfyUI"
+    echo "Usage: $0 [COMFYUI_DIR]"
     echo ""
-    echo "Options:"
-    echo "  COMFYUI_DIR     Path to ComfyUI (default: /workspace/ComfyUI)"
-    echo "  DRIVE_FOLDER_ID Google Drive folder ID (default: your folder)"
+    echo "Downloads all models from your Google Drive folder and"
+    echo "automatically sorts them into the correct ComfyUI directories."
     echo ""
-    echo "Commands:"
-    echo "  --all           Download entire folder"
-    echo "  --help          Show this help"
+    echo "Arguments:"
+    echo "  COMFYUI_DIR   Path to ComfyUI (default: /workspace/ComfyUI)"
+    echo ""
+    echo "File Routing:"
+    echo "  *lora*, *LoRA*           → models/loras/"
+    echo "  *vae*, *VAE*             → models/vae/"
+    echo "  *embedding*, *embed*     → models/embeddings/"
+    echo "  *upscale*, *ESRGAN*      → models/upscale_models/"
+    echo "  *controlnet*, *cn_*      → models/controlnet/"
+    echo "  *.safetensors, *.ckpt    → models/checkpoints/ (default)"
+    echo ""
+    echo "Google Drive Folder:"
+    echo "  https://drive.google.com/drive/folders/$DRIVE_FOLDER_ID"
 }
 
 # Main execution
-if [ "$1" == "--help" ]; then
-    show_help
-    exit 0
-elif [ "$1" == "--all" ]; then
-    download_all_from_folder
-else
-    download_models
-fi
-
-echo -e "\n${GREEN}=== Google Drive Download Complete ===${NC}"
-echo -e "Models location: $COMFYUI_DIR/models/"
+case "$1" in
+    --help|-h)
+        show_help
+        ;;
+    *)
+        sync_from_gdrive
+        ;;
+esac

@@ -282,6 +282,23 @@ else
     process_manifest
 fi
 
+# Check if Google Drive auto-sync is enabled
+gdrive_enabled=$(jq -r '.google_drive.auto_sync // false' "$MANIFEST_FILE" 2>/dev/null)
+if [ "$gdrive_enabled" == "true" ]; then
+    print_header "GOOGLE DRIVE AUTO-SYNC"
+
+    echo -e "${BLUE}${CLOUD}${NC} Google Drive auto-sync is enabled"
+    echo -e "${DIM}All files in your Drive folder will be downloaded and sorted automatically${NC}"
+    echo ""
+
+    # Run the Google Drive sync script
+    if [ -f "$SCRIPT_DIR/download_from_gdrive.sh" ]; then
+        bash "$SCRIPT_DIR/download_from_gdrive.sh" "$COMFYUI_DIR"
+    else
+        echo -e "${YELLOW}Google Drive sync script not found${NC}"
+    fi
+fi
+
 # Final summary
 print_header "FINAL STATUS"
 

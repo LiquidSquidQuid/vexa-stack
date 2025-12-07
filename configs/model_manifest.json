@@ -1,84 +1,75 @@
 {
-  "google_drive_folder": "1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L",
+  "google_drive": {
+    "enabled": true,
+    "folder_id": "1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L",
+    "folder_url": "https://drive.google.com/drive/folders/1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L",
+    "auto_sync": true,
+    "description": "All files in this folder are automatically downloaded and sorted by type"
+  },
   "models": [
     {
       "type": "checkpoint",
       "name": "RealVisXL_V5.0_Lightning_fp16.safetensors",
       "url": "https://huggingface.co/SG161222/RealVisXL_V5.0_Lightning/resolve/main/RealVisXL_V5.0_Lightning_fp16.safetensors",
-      "gdrive_id": "",
       "source": "huggingface",
       "size": "6.46GB",
       "description": "Primary base model for Vexa - photorealistic SDXL model",
       "required": true
     },
     {
-      "type": "checkpoint",
-      "name": "ponyRealism_v22MainVAE.safetensors",
-      "url": "gdrive://folder",
-      "gdrive_id": "",
-      "source": "gdrive",
-      "size": "6.46GB",
-      "description": "Pony Realism v2.2 - photorealistic model with built-in VAE",
-      "required": true
-    },
-    {
       "type": "lora",
       "name": "add-detail-xl.safetensors",
       "url": "https://huggingface.co/LyliaEngine/add-detail-xl/resolve/main/add-detail-xl.safetensors",
+      "source": "huggingface",
       "size": "49.6MB",
       "description": "Enhances fine details in generated images (use weight 1.5, range -3 to 3)",
       "required": true
     },
     {
-      "type": "lora",
-      "name": "skin_tone_adjuster.safetensors",
-      "url": "placeholder_url_skin_lora",
-      "size": "144MB",
-      "description": "Improves skin rendering",
-      "required": false
-    },
-    {
       "type": "vae",
       "name": "sdxl_vae.safetensors",
       "url": "https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors",
+      "source": "huggingface",
       "size": "334.6MB",
       "description": "SDXL VAE for better color reproduction",
       "required": true
     },
     {
-      "type": "vae",
-      "name": "vae-ft-mse-840000-ema-pruned.ckpt",
-      "url": "https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.ckpt",
-      "size": "334.6MB",
-      "description": "Alternative VAE option",
-      "required": false
-    },
-    {
       "type": "embedding",
       "name": "negativeXL_D.safetensors",
       "url": "https://civitai.com/api/download/models/263032",
+      "source": "civitai",
       "size": "1KB",
       "description": "Negative embedding for SDXL",
-      "required": true
+      "required": false
     },
     {
       "type": "upscale",
       "name": "RealESRGAN_x4plus.pth",
       "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth",
+      "source": "github",
       "size": "63.9MB",
       "description": "4x upscaler for high-res outputs",
       "required": false
     }
   ],
+  "file_routing": {
+    "description": "How files are automatically sorted based on filename patterns",
+    "rules": [
+      {"pattern": "*lora*, *LoRA*", "destination": "models/loras/"},
+      {"pattern": "*vae*, *VAE*", "destination": "models/vae/"},
+      {"pattern": "*embedding*, *embed*", "destination": "models/embeddings/"},
+      {"pattern": "*upscale*, *ESRGAN*, *4x*", "destination": "models/upscale_models/"},
+      {"pattern": "*controlnet*, *cn_*", "destination": "models/controlnet/"},
+      {"pattern": "*clip*, *text_encoder*", "destination": "models/clip/"},
+      {"pattern": "*.json", "destination": "user/default/workflows/"},
+      {"pattern": "*.safetensors, *.ckpt", "destination": "models/checkpoints/"}
+    ]
+  },
   "download_settings": {
     "parallel_downloads": 2,
     "retry_attempts": 3,
-    "timeout_seconds": 3600,
-    "verify_checksums": false
-  },
-  "notes": {
-    "placeholder_urls": "Some URLs marked as 'placeholder_url_' need to be replaced with actual model URLs",
-    "civitai_api": "CivitAI URLs require API token for some models - set CIVITAI_TOKEN env variable",
-    "huggingface": "HuggingFace direct URLs should work without authentication for public models"
+    "retry_delay_seconds": 30,
+    "timeout_seconds": 3600
   }
 }

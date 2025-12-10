@@ -52,6 +52,13 @@ fi
 cd - > /dev/null
 echo -e "${GREEN}✓ ComfyUI updated${NC}"
 
+# Install common dependencies for custom nodes
+echo -e "${YELLOW}Installing common node dependencies...${NC}"
+pip install -q piexif dill numexpr scikit-image ultralytics imageio-ffmpeg 2>/dev/null || {
+    echo -e "${YELLOW}Warning: Some optional dependencies may have failed${NC}"
+}
+echo -e "${GREEN}✓ Node dependencies installed${NC}"
+
 # Detect GPU
 GPU_INFO=$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || echo "No GPU detected")
 echo -e "${GREEN}✓ GPU: $GPU_INFO${NC}"

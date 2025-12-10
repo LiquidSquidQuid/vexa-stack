@@ -294,9 +294,12 @@ if [ "$gdrive_enabled" == "true" ]; then
     echo -e "${DIM}All files in your Drive folder will be downloaded and sorted automatically${NC}"
     echo ""
 
-    # Run the Google Drive sync script
+    # Run the Google Drive sync script (non-blocking on failure)
     if [ -f "$SCRIPT_DIR/download_from_gdrive.sh" ]; then
-        bash "$SCRIPT_DIR/download_from_gdrive.sh" "$COMFYUI_DIR"
+        bash "$SCRIPT_DIR/download_from_gdrive.sh" "$COMFYUI_DIR" || {
+            echo -e "${YELLOW}Google Drive sync failed (rate limited or network issue)${NC}"
+            echo -e "${YELLOW}This is not critical - continuing with setup...${NC}"
+        }
     else
         echo -e "${YELLOW}Google Drive sync script not found${NC}"
     fi

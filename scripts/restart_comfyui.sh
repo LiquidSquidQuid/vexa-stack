@@ -76,8 +76,14 @@ fi
 echo -e "\n${YELLOW}Starting ComfyUI...${NC}"
 cd "$COMFYUI_DIR"
 
+# Detect python command (python3 on most systems, python in some venvs)
+PYTHON_CMD="python3"
+if ! command -v python3 &> /dev/null; then
+    PYTHON_CMD="python"
+fi
+
 # Build command with common arguments
-CMD="python main.py --listen 0.0.0.0 --port $COMFYUI_PORT"
+CMD="$PYTHON_CMD main.py --listen 0.0.0.0 --port $COMFYUI_PORT"
 
 # Add GPU/CUDA optimizations if available
 if command -v nvidia-smi &> /dev/null; then

@@ -39,6 +39,7 @@ echo -e "${GREEN}${CHECK} Directories created${NC}"
 echo ""
 echo -e "${BOLD}Installing required custom nodes...${NC}"
 
+mkdir -p "$COMFYUI_DIR/custom_nodes"
 cd "$COMFYUI_DIR/custom_nodes"
 
 # VideoHelperSuite

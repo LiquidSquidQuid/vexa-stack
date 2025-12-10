@@ -166,6 +166,9 @@ process_manifest() {
             embedding) dest_dir="$COMFYUI_DIR/models/embeddings" ;;
             upscale) dest_dir="$COMFYUI_DIR/models/upscale_models" ;;
             controlnet) dest_dir="$COMFYUI_DIR/models/controlnet" ;;
+            diffusion_model) dest_dir="$COMFYUI_DIR/models/diffusion_models" ;;
+            text_encoder) dest_dir="$COMFYUI_DIR/models/text_encoders" ;;
+            clip_vision) dest_dir="$COMFYUI_DIR/models/clip_vision" ;;
             *) dest_dir="$COMFYUI_DIR/models/$type" ;;
         esac
 
@@ -303,7 +306,7 @@ fi
 print_header "FINAL STATUS"
 
 echo -e "${BOLD}Model directories:${NC}"
-for dir in checkpoints loras vae embeddings upscale_models controlnet; do
+for dir in checkpoints loras vae embeddings upscale_models controlnet diffusion_models text_encoders clip_vision; do
     full_path="$COMFYUI_DIR/models/$dir"
     if [ -d "$full_path" ]; then
         count=$(find "$full_path" -maxdepth 1 -type f \( -name "*.safetensors" -o -name "*.ckpt" -o -name "*.pth" -o -name "*.pt" \) 2>/dev/null | wc -l)

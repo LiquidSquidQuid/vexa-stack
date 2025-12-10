@@ -46,11 +46,70 @@
     {
       "type": "upscale",
       "name": "RealESRGAN_x4plus.pth",
-      "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth",
-      "source": "github",
+      "url": "https://huggingface.co/fofr/comfyui/resolve/main/upscale_models/RealESRGAN_x4plus.pth",
+      "source": "huggingface",
       "size": "63.9MB",
       "description": "4x upscaler for high-res outputs",
+      "required": true
+    },
+    {
+      "type": "upscale",
+      "name": "RealESRGAN_x2.pth",
+      "url": "https://huggingface.co/fofr/comfyui/resolve/main/upscale_models/RealESRGAN_x2.pth",
+      "source": "huggingface",
+      "size": "64MB",
+      "description": "2x upscaler for moderate upscaling",
       "required": false
+    },
+    {
+      "type": "diffusion_model",
+      "name": "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "source": "huggingface",
+      "size": "14GB",
+      "description": "Wan 2.2 I2V High-Noise Model (first pass) for image-to-video",
+      "required": true,
+      "category": "i2v"
+    },
+    {
+      "type": "diffusion_model",
+      "name": "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "source": "huggingface",
+      "size": "14GB",
+      "description": "Wan 2.2 I2V Low-Noise Model (refine pass) for image-to-video",
+      "required": true,
+      "category": "i2v"
+    },
+    {
+      "type": "vae",
+      "name": "wan_2.1_vae.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors",
+      "source": "huggingface",
+      "size": "335MB",
+      "description": "Wan VAE for video generation",
+      "required": true,
+      "category": "i2v"
+    },
+    {
+      "type": "text_encoder",
+      "name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "source": "huggingface",
+      "size": "5GB",
+      "description": "UMT5 XXL text encoder for Wan video models",
+      "required": true,
+      "category": "i2v"
+    },
+    {
+      "type": "clip_vision",
+      "name": "clip_vision_h.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors",
+      "source": "huggingface",
+      "size": "2GB",
+      "description": "CLIP Vision H for image encoding in Wan I2V",
+      "required": true,
+      "category": "i2v"
     }
   ],
   "file_routing": {
@@ -59,9 +118,12 @@
       {"pattern": "*lora*, *LoRA*", "destination": "models/loras/"},
       {"pattern": "*vae*, *VAE*", "destination": "models/vae/"},
       {"pattern": "*embedding*, *embed*", "destination": "models/embeddings/"},
-      {"pattern": "*upscale*, *ESRGAN*, *4x*", "destination": "models/upscale_models/"},
+      {"pattern": "*upscale*, *ESRGAN*, *4x*, *2x*", "destination": "models/upscale_models/"},
       {"pattern": "*controlnet*, *cn_*", "destination": "models/controlnet/"},
+      {"pattern": "*clip_vision*", "destination": "models/clip_vision/"},
       {"pattern": "*clip*, *text_encoder*", "destination": "models/clip/"},
+      {"pattern": "*umt5*, *t5xxl*", "destination": "models/text_encoders/"},
+      {"pattern": "*diffusion*, *i2v*, *wan*", "destination": "models/diffusion_models/"},
       {"pattern": "*.json", "destination": "user/default/workflows/"},
       {"pattern": "*.safetensors, *.ckpt", "destination": "models/checkpoints/"}
     ]

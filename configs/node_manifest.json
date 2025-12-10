@@ -43,10 +43,18 @@
     {
       "name": "ComfyUI-VideoHelperSuite",
       "url": "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git",
-      "description": "Video processing utilities",
-      "required": false,
+      "description": "Video processing utilities (required for I2V)",
+      "required": true,
       "install_type": "git_clone",
       "post_install": "pip install -r requirements.txt"
+    },
+    {
+      "name": "ComfyUI-Frame-Interpolation",
+      "url": "https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git",
+      "description": "RIFE frame interpolation for smoother video (required for I2V)",
+      "required": true,
+      "install_type": "git_clone",
+      "post_install": "python install.py"
     },
     {
       "name": "ComfyUI_FizzNodes",

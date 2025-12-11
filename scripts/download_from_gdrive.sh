@@ -4,7 +4,8 @@
 # Automatically downloads ALL files from Drive folder and sorts them intelligently
 
 COMFYUI_DIR="${1:-/workspace/ComfyUI}"
-DRIVE_FOLDER_ID="1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L"
+# Allow override via environment variable, with default fallback
+DRIVE_FOLDER_ID="${GDRIVE_FOLDER_ID:-1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L}"
 
 # Colors and symbols
 RED='\033[0;31m'
@@ -217,16 +218,22 @@ sync_from_gdrive() {
     echo -e "${YELLOW}Fetching file list from Google Drive...${NC}"
     echo ""
 
-    # Get list of files
-    local file_list=$(gdown --folder --id "$DRIVE_FOLDER_ID" --dry-run 2>&1 | grep "Processing file" || true)
+    # Get list of files with error handling for gdown output format changes
+    local raw_output=$(gdown --folder --id "$DRIVE_FOLDER_ID" --dry-run 2>&1 || true)
+    local file_list=$(echo "$raw_output" | grep "Processing file" || true)
 
     if [ -z "$file_list" ]; then
         echo -e "${RED}${CROSS} Could not retrieve file list from Google Drive${NC}"
         echo -e "${YELLOW}This might be due to:${NC}"
         echo -e "  - Folder sharing permissions"
         echo -e "  - Network issues"
+        echo -e "  - gdown output format change"
+        echo ""
+        echo -e "${DIM}Raw output (for debugging):${NC}"
+        echo -e "${DIM}$(echo "$raw_output" | head -5)${NC}"
         echo ""
         echo -e "Make sure the folder is shared as 'Anyone with the link can view'"
+        echo -e "Or set GDRIVE_FOLDER_ID environment variable to use a different folder"
         return 1
     fi
 

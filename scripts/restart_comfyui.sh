@@ -92,11 +92,32 @@ if command -v nvidia-smi &> /dev/null; then
     CMD="$CMD --gpu-only"
 fi
 
-# Check for low VRAM mode
+# Check for low VRAM mode and warn about I2V requirements
 VRAM_MB=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
-if [ -n "$VRAM_MB" ] && [ "$VRAM_MB" -lt 8000 ]; then
-    echo -e "${YELLOW}Detected low VRAM ($VRAM_MB MB), enabling low VRAM mode${NC}"
-    CMD="$CMD --lowvram"
+if [ -n "$VRAM_MB" ]; then
+    echo -e "Detected VRAM: ${VRAM_MB} MB"
+
+    # Enable low VRAM mode if < 8GB
+    if [ "$VRAM_MB" -lt 8000 ]; then
+        echo -e "${YELLOW}Low VRAM detected, enabling --lowvram mode${NC}"
+        CMD="$CMD --lowvram"
+    fi
+
+    # Warn about I2V model requirements
+    if [ "$VRAM_MB" -lt 16000 ]; then
+        # Check if I2V models are present
+        if [ -d "$COMFYUI_DIR/models/diffusion_models" ]; then
+            I2V_COUNT=$(find "$COMFYUI_DIR/models/diffusion_models" -name "*.safetensors" 2>/dev/null | wc -l)
+            if [ "$I2V_COUNT" -gt 0 ]; then
+                echo -e "${YELLOW}╔═══════════════════════════════════════════════════════════════╗${NC}"
+                echo -e "${YELLOW}║  WARNING: I2V models detected but VRAM may be insufficient    ║${NC}"
+                echo -e "${YELLOW}║  Wan 2.2 I2V models require 16GB+ VRAM for optimal use        ║${NC}"
+                echo -e "${YELLOW}║  Current VRAM: ${VRAM_MB} MB                                         ║${NC}"
+                echo -e "${YELLOW}║  Consider using --lowvram or reducing frame count/resolution  ║${NC}"
+                echo -e "${YELLOW}╚═══════════════════════════════════════════════════════════════╝${NC}"
+            fi
+        fi
+    fi
 fi
 
 # Add preview method

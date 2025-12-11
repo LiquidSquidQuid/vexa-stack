@@ -30,7 +30,19 @@ CLOUD="☁"
 # Check if jq is installed for JSON parsing
 if ! command -v jq &> /dev/null; then
     echo -e "${YELLOW}jq not found, installing...${NC}"
-    apt-get update -qq && apt-get install -y -qq jq || yum install -y jq || echo "Failed to install jq"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - try brew
+        if command -v brew &> /dev/null; then
+            brew install jq
+        else
+            echo -e "${RED}Please install jq: brew install jq${NC}"
+        fi
+    else
+        # Linux - try apt-get or yum
+        apt-get update -qq && apt-get install -y -qq jq 2>/dev/null || yum install -y jq 2>/dev/null || {
+            echo -e "${RED}Failed to install jq. Please install manually.${NC}"
+        }
+    fi
 fi
 
 # Function to format file size

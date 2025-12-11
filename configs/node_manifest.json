@@ -108,6 +108,6 @@
   "install_settings": {
     "auto_update": false,
     "install_dependencies": true,
-    "restart_required_after": ["ComfyUI-Manager", "ComfyUI-Impact-Pack"]
+    "restart_required_after": ["ComfyUI-Manager", "ComfyUI-Impact-Pack", "ComfyUI-VideoHelperSuite", "ComfyUI-Frame-Interpolation"]
   }
 }

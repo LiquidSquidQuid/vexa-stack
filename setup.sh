@@ -90,8 +90,8 @@ fi
 echo -e "\n${YELLOW}Downloading models...${NC}"
 bash "$SCRIPT_DIR/scripts/inject_models.sh" "$COMFYUI_DIR"
 
-# Try Google Drive download if models are missing
-if [ ! -f "$COMFYUI_DIR/models/checkpoints/ponyRealism_v22MainVAE.safetensors" ]; then
+# Try Google Drive download if primary model is missing
+if [ ! -f "$COMFYUI_DIR/models/checkpoints/RealVisXL_V5.0_Lightning_fp16.safetensors" ]; then
     echo -e "\n${YELLOW}Attempting Google Drive download for missing models...${NC}"
     bash "$SCRIPT_DIR/scripts/download_from_gdrive.sh" "$COMFYUI_DIR" || {
         echo -e "${YELLOW}Some models may need manual upload to Google Drive${NC}"

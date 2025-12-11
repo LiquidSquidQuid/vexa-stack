@@ -32,14 +32,24 @@ This will:
 
 ## 📦 What Gets Installed
 
-### Models (via Google Drive)
-The setup now supports downloading models from your Google Drive folder:
+### Models (via HuggingFace + Google Drive)
+The setup downloads models from HuggingFace and syncs additional models from Google Drive:
 - **Drive Folder**: [Your Model Storage](https://drive.google.com/drive/folders/1HvM1aNyjj7kh1LXZFH7zbqF_o2cdKY_L)
-- **RealVisXL V5.0 Lightning** (6.46GB) - Primary photorealistic model
-- **Pony Realism v2.2** (6.46GB) - Alternative realistic model with VAE
+
+**Text-to-Image Models:**
+- **RealVisXL V5.0 Lightning** (6.46GB) - Primary photorealistic SDXL model
 - **SDXL VAE** (335MB) - For better color reproduction
 - **Detail Enhancer LoRA** (50MB) - For fine details
 - Various embeddings and upscalers
+
+**Image-to-Video Models (Wan 2.2):**
+- **Wan 2.2 I2V High-Noise** (14GB) - First pass diffusion model
+- **Wan 2.2 I2V Low-Noise** (14GB) - Refine pass diffusion model
+- **UMT5 XXL Text Encoder** (5GB) - Text encoding for Wan
+- **CLIP Vision H** (2GB) - Image encoding for I2V
+- **Wan VAE** (335MB) - Video VAE
+
+> **Note**: I2V models require 16GB+ VRAM for optimal performance
 
 ### Custom Nodes
 - ComfyUI Manager
@@ -81,14 +91,20 @@ The setup now supports downloading models from your Google Drive folder:
 bash vexa-stack/utils/health_check.sh
 ```
 
-### Download Specific Model
+### Download All Models from Manifest
 ```bash
-bash vexa-stack/scripts/inject_models.sh /workspace/ComfyUI "model_name.safetensors"
+bash vexa-stack/scripts/inject_models.sh /workspace/ComfyUI
 ```
 
-### Install Specific Node
+### Sync Models from Google Drive
 ```bash
-bash vexa-stack/scripts/inject_nodes.sh /workspace/ComfyUI "NodeName"
+# Uses default folder, or set GDRIVE_FOLDER_ID for custom folder
+bash vexa-stack/scripts/download_from_gdrive.sh /workspace/ComfyUI
+```
+
+### Install Custom Nodes
+```bash
+bash vexa-stack/scripts/inject_nodes.sh /workspace/ComfyUI
 ```
 
 ### Restart ComfyUI

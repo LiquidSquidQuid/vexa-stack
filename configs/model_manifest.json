@@ -40,9 +40,9 @@
     {
       "type": "embedding",
       "name": "negativeXL_D.safetensors",
-      "url": "https://civitai.com/api/download/models/263032",
-      "source": "civitai",
-      "size": "1KB",
+      "url": "https://huggingface.co/gsdf/CounterfeitXL/resolve/main/embeddings/negativeXL_D.safetensors",
+      "source": "huggingface",
+      "size": "131KB",
       "description": "Negative embedding for SDXL",
       "required": false,
       "category": "t2i"

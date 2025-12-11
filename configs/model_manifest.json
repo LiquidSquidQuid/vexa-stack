@@ -14,7 +14,8 @@
       "source": "huggingface",
       "size": "6.46GB",
       "description": "Primary base model for Vexa - photorealistic SDXL model",
-      "required": true
+      "required": true,
+      "category": "t2i"
     },
     {
       "type": "lora",
@@ -23,7 +24,8 @@
       "source": "huggingface",
       "size": "49.6MB",
       "description": "Enhances fine details in generated images (use weight 1.5, range -3 to 3)",
-      "required": true
+      "required": true,
+      "category": "t2i"
     },
     {
       "type": "vae",
@@ -32,7 +34,8 @@
       "source": "huggingface",
       "size": "334.6MB",
       "description": "SDXL VAE for better color reproduction",
-      "required": true
+      "required": true,
+      "category": "t2i"
     },
     {
       "type": "embedding",
@@ -41,7 +44,8 @@
       "source": "civitai",
       "size": "1KB",
       "description": "Negative embedding for SDXL",
-      "required": false
+      "required": false,
+      "category": "t2i"
     },
     {
       "type": "upscale",
@@ -50,7 +54,8 @@
       "source": "huggingface",
       "size": "63.9MB",
       "description": "4x upscaler for high-res outputs",
-      "required": true
+      "required": true,
+      "category": "shared"
     },
     {
       "type": "upscale",
@@ -59,7 +64,8 @@
       "source": "huggingface",
       "size": "64MB",
       "description": "2x upscaler for moderate upscaling",
-      "required": false
+      "required": false,
+      "category": "shared"
     },
     {
       "type": "diffusion_model",

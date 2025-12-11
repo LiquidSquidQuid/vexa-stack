@@ -148,13 +148,20 @@ process_manifest() {
         return 1
     fi
 
+    # Get install category from environment (default: all)
+    local INSTALL_CATEGORY="${INSTALL_CATEGORY:-all}"
+
     print_header "MODEL INVENTORY SCAN"
+
+    echo -e "  Installation mode: ${CYAN}${INSTALL_CATEGORY}${NC}"
+    echo ""
 
     # Arrays to track status
     local existing=()
     local to_download=()
     local gdrive_models=()
     local skipped=()
+    local category_skipped=()
 
     # First pass: scan all models and categorize
     echo -e "${BOLD}Scanning local model directories...${NC}\n"
@@ -166,9 +173,20 @@ process_manifest() {
         local size=$(echo "$model" | jq -r '.size')
         local required=$(echo "$model" | jq -r '.required')
         local source=$(echo "$model" | jq -r '.source // "direct"')
+        local category=$(echo "$model" | jq -r '.category // "t2i"')
 
         # Skip non-required for now
         [ "$required" != "true" ] && continue
+
+        # Filter by installation category
+        if [ "$INSTALL_CATEGORY" != "all" ]; then
+            # Always include "shared" models, skip others that don't match
+            if [ "$category" != "$INSTALL_CATEGORY" ] && [ "$category" != "shared" ]; then
+                category_skipped+=("$name|$size|$category")
+                echo -e "  ${DIM}○ ${name} (${size}) [SKIPPED - ${category} only]${NC}"
+                continue
+            fi
+        fi
 
         # Determine destination directory
         case "$type" in
@@ -217,7 +235,8 @@ process_manifest() {
     echo -e "${BOLD}│${NC} ${GREEN}${CHECK} Already exists:${NC}    ${#existing[@]} models     ${BOLD}│${NC}"
     echo -e "${BOLD}│${NC} ${CYAN}${DOWNLOAD} To download:${NC}       ${#to_download[@]} models     ${BOLD}│${NC}"
     echo -e "${BOLD}│${NC} ${BLUE}${CLOUD} Google Drive:${NC}       ${#gdrive_models[@]} models     ${BOLD}│${NC}"
-    echo -e "${BOLD}│${NC} ${DIM}○ Skipped:${NC}            ${#skipped[@]} models     ${BOLD}│${NC}"
+    echo -e "${BOLD}│${NC} ${DIM}○ Skipped (category):${NC} ${#category_skipped[@]} models     ${BOLD}│${NC}"
+    echo -e "${BOLD}│${NC} ${DIM}○ Skipped (other):${NC}    ${#skipped[@]} models     ${BOLD}│${NC}"
     echo -e "${BOLD}└─────────────────────────────────────┘${NC}"
 
     # Download from direct URLs

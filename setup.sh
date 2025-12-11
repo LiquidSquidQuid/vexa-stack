@@ -10,9 +10,49 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+DIM='\033[2m'
 NC='\033[0m' # No Color
 
 echo -e "${GREEN}=== Vexa Stack Setup for RunPod ===${NC}"
+echo ""
+
+# Installation type selection menu
+echo -e "${BOLD}╔═══════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${BOLD}║           SELECT INSTALLATION TYPE                            ║${NC}"
+echo -e "${BOLD}╠═══════════════════════════════════════════════════════════════╣${NC}"
+echo -e "${BOLD}║${NC}  ${CYAN}1)${NC} Text-to-Image only    ${DIM}(~7.5GB)${NC}                           ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}     ${DIM}Photorealistic image generation with SDXL${NC}               ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}                                                               ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}  ${CYAN}2)${NC} Image-to-Video only   ${DIM}(~35GB)${NC}                            ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}     ${DIM}Video generation from images with Wan 2.2${NC}               ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}                                                               ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}  ${CYAN}3)${NC} Full Stack            ${DIM}(~43GB)${NC}                            ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}     ${DIM}Both T2I and I2V capabilities${NC}                           ${BOLD}║${NC}"
+echo -e "${BOLD}╚═══════════════════════════════════════════════════════════════╝${NC}"
+echo ""
+read -p "Enter choice [1-3, default=3]: " INSTALL_TYPE
+INSTALL_TYPE=${INSTALL_TYPE:-3}
+
+case $INSTALL_TYPE in
+    1)
+        INSTALL_CATEGORY="t2i"
+        echo -e "${GREEN}✓ Selected: Text-to-Image only${NC}"
+        ;;
+    2)
+        INSTALL_CATEGORY="i2v"
+        echo -e "${GREEN}✓ Selected: Image-to-Video only${NC}"
+        ;;
+    *)
+        INSTALL_CATEGORY="all"
+        echo -e "${GREEN}✓ Selected: Full Stack (T2I + I2V)${NC}"
+        ;;
+esac
+
+export INSTALL_CATEGORY
+echo ""
 echo "Initializing environment detection..."
 
 # Source the environment detection

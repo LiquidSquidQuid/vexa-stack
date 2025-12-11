@@ -27,6 +27,56 @@ DOWNLOAD="⬇"
 MAX_RETRIES=3
 RETRY_DELAY=30
 
+# Get install category from environment (default: all)
+INSTALL_CATEGORY="${INSTALL_CATEGORY:-all}"
+
+# Check if file should be skipped based on install category
+should_skip_file() {
+    local filename="$1"
+    local filename_lower=$(echo "$filename" | tr '[:upper:]' '[:lower:]')
+
+    # If installing all, never skip
+    if [ "$INSTALL_CATEGORY" == "all" ]; then
+        return 1  # Don't skip (false)
+    fi
+
+    # Upscalers are shared - never skip
+    if [[ "$filename_lower" == *"upscale"* ]] || [[ "$filename_lower" == *"esrgan"* ]] || \
+       [[ "$filename_lower" == *"4x"* ]] || [[ "$filename_lower" == *"2x"* ]]; then
+        return 1  # Don't skip
+    fi
+
+    # Determine if file is I2V-related
+    local is_i2v=false
+    if [[ "$filename_lower" == *"wan"* ]] || [[ "$filename_lower" == *"i2v"* ]] || \
+       [[ "$filename_lower" == *"umt5"* ]] || [[ "$filename_lower" == *"clip_vision"* ]] || \
+       [[ "$filename_lower" == *"hunyuan"* ]] || [[ "$filename_lower" == *"video"* ]]; then
+        is_i2v=true
+    fi
+
+    # T2I mode: skip I2V files
+    if [ "$INSTALL_CATEGORY" == "t2i" ] && [ "$is_i2v" == true ]; then
+        return 0  # Skip (true)
+    fi
+
+    # I2V mode: skip T2I-only files (checkpoints that aren't I2V-related)
+    if [ "$INSTALL_CATEGORY" == "i2v" ] && [ "$is_i2v" == false ]; then
+        # Skip typical T2I checkpoints
+        if [[ "$filename_lower" == *"realvis"* ]] || [[ "$filename_lower" == *"sdxl"* ]] || \
+           [[ "$filename_lower" == *"flux"* ]] || [[ "$filename_lower" == *"pony"* ]] || \
+           [[ "$filename_lower" == *"aphrodite"* ]] || [[ "$filename_lower" == *"biglove"* ]]; then
+            return 0  # Skip (true)
+        fi
+        # Also skip T2I-specific LoRAs and embeddings
+        if [[ "$filename_lower" == *"lora"* ]] || [[ "$filename_lower" == *"embedding"* ]] || \
+           [[ "$filename_lower" == *"negative"* ]]; then
+            return 0  # Skip (true)
+        fi
+    fi
+
+    return 1  # Don't skip (false)
+}
+
 # Print header
 print_header() {
     echo ""
@@ -207,6 +257,7 @@ sync_from_gdrive() {
 
     echo -e "  ${CLOUD} Drive Folder: ${CYAN}https://drive.google.com/drive/folders/$DRIVE_FOLDER_ID${NC}"
     echo -e "  📁 Target: ${CYAN}$COMFYUI_DIR${NC}"
+    echo -e "  📋 Install Mode: ${CYAN}${INSTALL_CATEGORY}${NC}"
     echo ""
 
     # Install gdown
@@ -244,6 +295,7 @@ sync_from_gdrive() {
     local success_count=0
     local skip_count=0
     local fail_count=0
+    local category_skip_count=0
 
     # Store file info for processing
     declare -a files_to_process
@@ -252,6 +304,13 @@ sync_from_gdrive() {
         if [[ "$line" == *"Processing file"* ]]; then
             file_id=$(echo "$line" | awk '{print $3}')
             file_name=$(echo "$line" | sed 's/Processing file [^ ]* //')
+
+            # Check if file should be skipped based on category
+            if should_skip_file "$file_name"; then
+                echo -e "  ${DIM}○ ${file_name} [SKIPPED - not needed for ${INSTALL_CATEGORY}]${NC}"
+                category_skip_count=$((category_skip_count + 1))
+                continue
+            fi
 
             # Determine destination
             dest_dir=$(get_destination_dir "$file_name")
@@ -266,6 +325,9 @@ sync_from_gdrive() {
     done <<< "$file_list"
 
     echo ""
+    if [ $category_skip_count -gt 0 ]; then
+        echo -e "${YELLOW}Skipped ${category_skip_count} files (not needed for ${INSTALL_CATEGORY} mode)${NC}"
+    fi
     echo -e "${BOLD}Total files to process: ${total_files}${NC}"
 
     # Download files individually

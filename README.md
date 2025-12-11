@@ -23,11 +23,34 @@ git clone https://github.com/LiquidSquidQuid/vexa-stack.git && \
 bash vexa-stack/setup.sh
 ```
 
+### Installation Menu
+
+The setup script presents an interactive menu to choose what to install:
+
+```
+╔═══════════════════════════════════════════════════════════════╗
+║           SELECT INSTALLATION TYPE                            ║
+╠═══════════════════════════════════════════════════════════════╣
+║  1) Text-to-Image only    (~7.5GB)                           ║
+║     Photorealistic image generation with SDXL                 ║
+║                                                               ║
+║  2) Image-to-Video only   (~35GB)                            ║
+║     Video generation from images with Wan 2.2                 ║
+║                                                               ║
+║  3) Full Stack            (~43GB)                            ║
+║     Both T2I and I2V capabilities                            ║
+╚═══════════════════════════════════════════════════════════════╝
+```
+
+- **Option 1 (T2I)**: Downloads RealVisXL, SDXL VAE, LoRAs, embeddings, and upscalers. Installs T2I workflows.
+- **Option 2 (I2V)**: Downloads Wan 2.2 models, UMT5 text encoder, CLIP Vision, and upscalers. Installs I2V workflows.
+- **Option 3 (Full)**: Downloads everything - both T2I and I2V models and all workflows.
+
 This will:
 1. Detect your ComfyUI installation and port
-2. Download required models (~13GB total)
-3. Install custom nodes
-4. Copy workflows
+2. Download required models based on your selection
+3. Install custom nodes (video nodes only for I2V/Full)
+4. Copy relevant workflows
 5. Configure everything automatically
 
 ## 📦 What Gets Installed
@@ -240,10 +263,14 @@ MIT License - Use freely for your Vexa project!
 
 ## ⚠️ Important Notes
 
-1. **First Run**: Initial setup downloads ~13GB of models - be patient
+1. **First Run**: Initial setup downloads models based on your selection:
+   - T2I only: ~7.5GB
+   - I2V only: ~35GB
+   - Full stack: ~43GB
 2. **Non-Persistent**: Everything resets when pod stops - that's why we automate!
 3. **API Keys**: Some model sources may require authentication
 4. **Workflows**: Your workflows are saved in the repo - customize as needed
+5. **I2V VRAM**: Image-to-Video models require 16GB+ VRAM for optimal performance
 
 ## 🎨 Vexa Project Context
 

@@ -19,6 +19,10 @@ NC='\033[0m'
 
 echo -e "${GREEN}=== Workflow Injection for ComfyUI ===${NC}"
 
+# Get install category from environment (default: all)
+INSTALL_CATEGORY="${INSTALL_CATEGORY:-all}"
+echo -e "Installation mode: ${BLUE}${INSTALL_CATEGORY}${NC}\n"
+
 # Check if workflow directory exists
 if [ ! -d "$WORKFLOW_DIR" ]; then
     echo -e "${RED}Error: Workflow directory not found: $WORKFLOW_DIR${NC}"
@@ -32,7 +36,7 @@ if [ "$workflow_count" -eq 0 ]; then
     exit 0
 fi
 
-echo -e "${BLUE}Found $workflow_count workflow(s) to inject${NC}"
+echo -e "${BLUE}Found $workflow_count total workflow(s)${NC}"
 
 # Determine target directory for workflows
 # ComfyUI stores workflows in different locations depending on setup
@@ -62,33 +66,83 @@ mkdir -p "$TARGET_DIR"
 # Copy workflow files (including subdirectories)
 echo -e "\n${YELLOW}Copying workflows to: $TARGET_DIR${NC}"
 
-# Copy root-level JSON files
+# Track counts
+copied_count=0
+skipped_count=0
+
+# Copy root-level JSON files (always copy vexa_ prefixed ones, filter others by category)
 for workflow_file in "$WORKFLOW_DIR"/*.json; do
     if [ -f "$workflow_file" ]; then
         filename=$(basename "$workflow_file")
-        echo -e "  Copying: $filename"
-        cp "$workflow_file" "$TARGET_DIR/"
-        chmod 644 "$TARGET_DIR/$filename"
+        filename_lower=$(echo "$filename" | tr '[:upper:]' '[:lower:]')
+
+        # Determine if this is T2I or I2V workflow based on name
+        is_i2v=false
+        if [[ "$filename_lower" == *"video"* ]] || [[ "$filename_lower" == *"i2v"* ]] || \
+           [[ "$filename_lower" == *"wan"* ]] || [[ "$filename_lower" == *"hunyuan"* ]]; then
+            is_i2v=true
+        fi
+
+        # Filter based on category
+        should_copy=true
+        if [ "$INSTALL_CATEGORY" == "t2i" ] && [ "$is_i2v" == true ]; then
+            should_copy=false
+        elif [ "$INSTALL_CATEGORY" == "i2v" ] && [ "$is_i2v" == false ]; then
+            # For I2V mode, skip T2I-only workflows (but keep generic ones)
+            if [[ "$filename_lower" == *"flux"* ]] || [[ "$filename_lower" == *"aphrodite"* ]] || \
+               [[ "$filename_lower" == *"biglove"* ]] || [[ "$filename_lower" == *"dmd2"* ]]; then
+                should_copy=false
+            fi
+        fi
+
+        if [ "$should_copy" == true ]; then
+            echo -e "  Copying: $filename"
+            cp "$workflow_file" "$TARGET_DIR/"
+            chmod 644 "$TARGET_DIR/$filename"
+            copied_count=$((copied_count + 1))
+        else
+            echo -e "  ${YELLOW}Skipping: $filename (not needed for $INSTALL_CATEGORY)${NC}"
+            skipped_count=$((skipped_count + 1))
+        fi
     fi
 done
 
-# Copy subdirectories with their workflows
+# Copy subdirectories based on category
 for subdir in "$WORKFLOW_DIR"/*/; do
     if [ -d "$subdir" ]; then
         subdir_name=$(basename "$subdir")
-        echo -e "  Copying subdirectory: $subdir_name/"
-        mkdir -p "$TARGET_DIR/$subdir_name"
+        subdir_lower=$(echo "$subdir_name" | tr '[:upper:]' '[:lower:]')
 
-        for workflow_file in "$subdir"*.json; do
-            if [ -f "$workflow_file" ]; then
-                filename=$(basename "$workflow_file")
-                echo -e "    - $filename"
-                cp "$workflow_file" "$TARGET_DIR/$subdir_name/"
-                chmod 644 "$TARGET_DIR/$subdir_name/$filename"
-            fi
-        done
+        # Determine if this directory should be copied based on category
+        should_copy_dir=false
+        if [ "$INSTALL_CATEGORY" == "all" ]; then
+            should_copy_dir=true
+        elif [ "$INSTALL_CATEGORY" == "t2i" ] && [[ "$subdir_lower" == *"text"* || "$subdir_lower" == *"image"* && "$subdir_lower" != *"video"* ]]; then
+            should_copy_dir=true
+        elif [ "$INSTALL_CATEGORY" == "i2v" ] && [[ "$subdir_lower" == *"video"* ]]; then
+            should_copy_dir=true
+        fi
+
+        if [ "$should_copy_dir" == true ]; then
+            echo -e "  Copying subdirectory: $subdir_name/"
+            mkdir -p "$TARGET_DIR/$subdir_name"
+
+            for workflow_file in "$subdir"*.json; do
+                if [ -f "$workflow_file" ]; then
+                    filename=$(basename "$workflow_file")
+                    echo -e "    - $filename"
+                    cp "$workflow_file" "$TARGET_DIR/$subdir_name/"
+                    chmod 644 "$TARGET_DIR/$subdir_name/$filename"
+                    copied_count=$((copied_count + 1))
+                fi
+            done
+        else
+            echo -e "  ${YELLOW}Skipping subdirectory: $subdir_name/ (not needed for $INSTALL_CATEGORY)${NC}"
+        fi
     fi
 done
+
+echo -e "\n${GREEN}Copied $copied_count workflows, skipped $skipped_count${NC}"
 
 # Try to notify ComfyUI about new workflows via API (if running)
 if command -v curl &> /dev/null; then

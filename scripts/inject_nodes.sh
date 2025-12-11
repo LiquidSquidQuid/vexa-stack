@@ -97,45 +97,63 @@ process_manifest() {
         echo -e "${RED}Error: Node manifest not found: $MANIFEST_FILE${NC}"
         return 1
     fi
-    
+
+    # Get install category from environment (default: all)
+    local INSTALL_CATEGORY="${INSTALL_CATEGORY:-all}"
+    echo -e "Installation mode: ${BLUE}${INSTALL_CATEGORY}${NC}\n"
+
     # Get restart-required nodes
     local restart_nodes=$(jq -r '.install_settings.restart_required_after[]' "$MANIFEST_FILE" 2>/dev/null)
-    
+
     # Count required nodes
     local total_required=$(jq '[.custom_nodes[] | select(.required == true)] | length' "$MANIFEST_FILE")
     echo -e "${YELLOW}Found $total_required required custom nodes${NC}\n"
-    
+
     # Process each node
     local count=0
+    local skipped_count=0
     while IFS= read -r node; do
         local name=$(echo "$node" | jq -r '.name')
         local url=$(echo "$node" | jq -r '.url')
         local description=$(echo "$node" | jq -r '.description')
         local required=$(echo "$node" | jq -r '.required')
         local post_install=$(echo "$node" | jq -r '.post_install')
-        
+        local category=$(echo "$node" | jq -r '.category // "common"')
+
         # Skip non-required nodes in minimal install
         if [ "$2" == "--required-only" ] && [ "$required" != "true" ]; then
             continue
         fi
-        
+
+        # Filter by installation category
+        # Skip I2V nodes if T2I only mode
+        if [ "$INSTALL_CATEGORY" == "t2i" ] && [ "$category" == "i2v" ]; then
+            echo -e "${YELLOW}[Skipping]${NC} $name (I2V only)"
+            skipped_count=$((skipped_count + 1))
+            continue
+        fi
+
         if [ "$required" == "true" ]; then
             count=$((count + 1))
             echo -e "${YELLOW}[$count/$total_required] Required Node${NC}"
         else
             echo -e "${YELLOW}[Optional Node]${NC}"
         fi
-        
+
         install_node "$name" "$url" "$description" "$post_install" "$required"
-        
+
         # Check if this node requires restart
         if echo "$restart_nodes" | grep -q "$name"; then
             RESTART_NEEDED=true
             echo -e "${YELLOW}  Note: ComfyUI restart will be needed${NC}"
         fi
-        
+
         echo ""
     done < <(jq -c '.custom_nodes[]' "$MANIFEST_FILE")
+
+    if [ $skipped_count -gt 0 ]; then
+        echo -e "${YELLOW}Skipped $skipped_count nodes (not needed for $INSTALL_CATEGORY mode)${NC}\n"
+    fi
 }
 
 # Install specific node by name

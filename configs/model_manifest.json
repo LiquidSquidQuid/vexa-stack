@@ -18,6 +18,26 @@
       "category": "t2i"
     },
     {
+      "type": "checkpoint",
+      "name": "ponyRealism_v21MainVAE.safetensors",
+      "url": "https://huggingface.co/LyliaEngine/ponyRealism_v21MainVAE/resolve/main/ponyRealism_v21MainVAE.safetensors",
+      "source": "huggingface",
+      "size": "7.11GB",
+      "description": "Pony Realism base model - good for faces and skin detail",
+      "required": false,
+      "category": "t2i"
+    },
+    {
+      "type": "checkpoint",
+      "name": "CyberRealisticPony_V65.safetensors",
+      "url": "https://huggingface.co/cyberdelia/CyberRealisticPony/resolve/main/CyberRealisticPony_V65.safetensors",
+      "source": "huggingface",
+      "size": "6.94GB",
+      "description": "CyberRealistic Pony refiner model - blends Pony with CyberRealistic style",
+      "required": false,
+      "category": "t2i"
+    },
+    {
       "type": "lora",
       "name": "add-detail-xl.safetensors",
       "url": "https://huggingface.co/LyliaEngine/add-detail-xl/resolve/main/add-detail-xl.safetensors",
@@ -66,6 +86,56 @@
       "description": "2x upscaler for moderate upscaling",
       "required": false,
       "category": "shared"
+    },
+    {
+      "type": "upscale",
+      "name": "4x_foolhardy_Remacri.pth",
+      "url": "https://huggingface.co/FacehugmanIII/4x_foolhardy_Remacri/resolve/main/4x_foolhardy_Remacri.pth",
+      "source": "huggingface",
+      "size": "67MB",
+      "description": "4x ESRGAN upscaler - more details, less smoothing",
+      "required": false,
+      "category": "shared"
+    },
+    {
+      "type": "sams",
+      "name": "sam_vit_b_01ec64.pth",
+      "url": "https://huggingface.co/ybelkada/segment-anything/resolve/main/checkpoints/sam_vit_b_01ec64.pth",
+      "source": "huggingface",
+      "size": "375MB",
+      "description": "Segment Anything Model (SAM) ViT-B for FaceDetailer",
+      "required": false,
+      "category": "t2i"
+    },
+    {
+      "type": "ultralytics_bbox",
+      "name": "face_yolov8n.pt",
+      "url": "https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8n.pt",
+      "source": "huggingface",
+      "size": "6.23MB",
+      "description": "YOLOv8 face detection model for FaceDetailer",
+      "required": false,
+      "category": "t2i"
+    },
+    {
+      "type": "ultralytics_bbox",
+      "name": "Eyes.pt",
+      "url": "https://huggingface.co/camenduru/IICF/resolve/main/ultralytics/bbox/Eyes.pt",
+      "source": "huggingface",
+      "size": "22.5MB",
+      "description": "YOLOv8 eye detection model for eye detailing",
+      "required": false,
+      "category": "t2i"
+    },
+    {
+      "type": "ultralytics_segm",
+      "name": "person_yolov8n-seg.pt",
+      "url": "https://huggingface.co/Bingsu/adetailer/resolve/main/person_yolov8n-seg.pt",
+      "source": "huggingface",
+      "size": "6.78MB",
+      "description": "YOLOv8 person segmentation model for FaceDetailer",
+      "required": false,
+      "category": "t2i"
     },
     {
       "type": "diffusion_model",

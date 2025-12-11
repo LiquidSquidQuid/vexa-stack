@@ -116,6 +116,51 @@
       "install_type": "git_clone",
       "post_install": null,
       "category": "common"
+    },
+    {
+      "name": "ComfyUI-Inspire-Pack",
+      "url": "https://github.com/ltdrdata/ComfyUI-Inspire-Pack.git",
+      "description": "KSamplerAdvanced pipe and other utilities for PONY workflows",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": "pip install -r requirements.txt",
+      "category": "common"
+    },
+    {
+      "name": "ComfyUI-Easy-Use",
+      "url": "https://github.com/yolain/ComfyUI-Easy-Use.git",
+      "description": "LoRA stack, styles selector, and utility nodes",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": "pip install -r requirements.txt",
+      "category": "common"
+    },
+    {
+      "name": "ComfyUI_tinyterraNodes",
+      "url": "https://github.com/TinyTerra/ComfyUI_tinyterraNodes.git",
+      "description": "ttN text node and other utilities",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null,
+      "category": "common"
+    },
+    {
+      "name": "ComfyUI_essentials",
+      "url": "https://github.com/cubiq/ComfyUI_essentials.git",
+      "description": "Essential utility nodes including SDXLEmptyLatentSizePicker",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null,
+      "category": "common"
+    },
+    {
+      "name": "SD-Latent-Interposer",
+      "url": "https://github.com/city96/SD-Latent-Interposer.git",
+      "description": "Mix different diffusion model types (XL/Pony/SD3/Flux)",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null,
+      "category": "common"
     }
   ],
   "install_settings": {

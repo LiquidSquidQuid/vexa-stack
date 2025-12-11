@@ -161,6 +161,33 @@
       "install_type": "git_clone",
       "post_install": null,
       "category": "common"
+    },
+    {
+      "name": "ComfyUI-GGUF",
+      "url": "https://github.com/city96/ComfyUI-GGUF.git",
+      "description": "Load GGUF quantized models - enables low-VRAM I2V with Wan GGUF",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null,
+      "category": "i2v"
+    },
+    {
+      "name": "ComfyUI-CogVideoXWrapper",
+      "url": "https://github.com/kijai/ComfyUI-CogVideoXWrapper.git",
+      "description": "CogVideoX I2V support - alternative video generation model",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null,
+      "category": "i2v"
+    },
+    {
+      "name": "ComfyUI-HunyuanVideoWrapper",
+      "url": "https://github.com/kijai/ComfyUI-HunyuanVideoWrapper.git",
+      "description": "HunyuanVideo support - 720p alternative to Wan models",
+      "required": false,
+      "install_type": "git_clone",
+      "post_install": null,
+      "category": "i2v"
     }
   ],
   "install_settings": {

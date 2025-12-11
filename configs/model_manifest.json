@@ -186,6 +186,76 @@
       "description": "CLIP Vision H for image encoding in Wan I2V",
       "required": true,
       "category": "i2v"
+    },
+    {
+      "type": "diffusion_model",
+      "name": "wan2.1-i2v-14b-480p-Q5_K_S.gguf",
+      "url": "https://huggingface.co/city96/Wan2.1-I2V-14B-gguf/resolve/main/wan2.1-i2v-14b-480p-Q5_K_S.gguf",
+      "source": "huggingface",
+      "size": "8.5GB",
+      "description": "GGUF quantized Wan 2.1 I2V - lower VRAM (~8GB), works with existing workflows",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "diffusion_model",
+      "name": "wan2.1_fun_InP_1.3B_bf16.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_fun_InP_1.3B_bf16.safetensors",
+      "source": "huggingface",
+      "size": "2.6GB",
+      "description": "Lightweight Wan 2.1 1.3B - fast iterations, ~6GB VRAM",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "diffusion_model",
+      "name": "hunyuan_video_image_to_video_720p_bf16.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/diffusion_models/hunyuan_video_image_to_video_720p_bf16.safetensors",
+      "source": "huggingface",
+      "size": "26GB",
+      "description": "HunyuanVideo I2V 720p - higher quality alternative to Wan",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "vae",
+      "name": "hunyuan_video_vae_bf16.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/vae/hunyuan_video_vae_bf16.safetensors",
+      "source": "huggingface",
+      "size": "200MB",
+      "description": "HunyuanVideo VAE for video decoding",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "text_encoder",
+      "name": "llava_llama3_fp8_scaled.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/text_encoders/llava_llama3_fp8_scaled.safetensors",
+      "source": "huggingface",
+      "size": "4.5GB",
+      "description": "LLaVA LLaMA3 text encoder for HunyuanVideo",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "text_encoder",
+      "name": "clip_l.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/text_encoders/clip_l.safetensors",
+      "source": "huggingface",
+      "size": "250MB",
+      "description": "CLIP-L text encoder for HunyuanVideo",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "clip_vision",
+      "name": "llava_llama3_vision.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/clip_vision/llava_llama3_vision.safetensors",
+      "source": "huggingface",
+      "size": "1.8GB",
+      "description": "LLaVA LLaMA3 vision encoder for HunyuanVideo I2V",
+      "required": false,
+      "category": "i2v"
     }
   ],
   "file_routing": {

@@ -121,9 +121,9 @@
       {"pattern": "*upscale*, *ESRGAN*, *4x*, *2x*", "destination": "models/upscale_models/"},
       {"pattern": "*controlnet*, *cn_*", "destination": "models/controlnet/"},
       {"pattern": "*clip_vision*", "destination": "models/clip_vision/"},
-      {"pattern": "*clip*, *text_encoder*", "destination": "models/clip/"},
-      {"pattern": "*umt5*, *t5xxl*", "destination": "models/text_encoders/"},
+      {"pattern": "*umt5*, *t5xxl*, *text_encoder*", "destination": "models/text_encoders/"},
       {"pattern": "*diffusion*, *i2v*, *wan*", "destination": "models/diffusion_models/"},
+      {"pattern": "*clip*", "destination": "models/clip/"},
       {"pattern": "*.json", "destination": "user/default/workflows/"},
       {"pattern": "*.safetensors, *.ckpt", "destination": "models/checkpoints/"}
     ]

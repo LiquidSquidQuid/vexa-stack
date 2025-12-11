@@ -172,6 +172,7 @@ Edit `configs/node_manifest.json`:
 The script searches common locations:
 - `/workspace/ComfyUI`
 - `/workspace/comfyui`
+- `/workspace/runpod-slim/ComfyUI`
 - `/comfyui`
 - `/app/ComfyUI`
 

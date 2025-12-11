@@ -70,8 +70,26 @@ get_destination_dir() {
         return
     fi
 
-    # CLIP patterns
-    if [[ "$filename_lower" == *"clip"* ]] || [[ "$filename_lower" == *"text_encoder"* ]]; then
+    # CLIP Vision patterns (must be before general clip)
+    if [[ "$filename_lower" == *"clip_vision"* ]]; then
+        echo "$COMFYUI_DIR/models/clip_vision"
+        return
+    fi
+
+    # Diffusion model patterns (Wan I2V, etc.)
+    if [[ "$filename_lower" == *"diffusion"* ]] || [[ "$filename_lower" == *"i2v"* ]] || [[ "$filename_lower" == *"wan"* ]] || [[ "$filename_lower" == *"unet"* ]]; then
+        echo "$COMFYUI_DIR/models/diffusion_models"
+        return
+    fi
+
+    # Text encoder patterns (UMT5, T5, etc.)
+    if [[ "$filename_lower" == *"umt5"* ]] || [[ "$filename_lower" == *"t5xxl"* ]] || [[ "$filename_lower" == *"text_encoder"* ]]; then
+        echo "$COMFYUI_DIR/models/text_encoders"
+        return
+    fi
+
+    # General CLIP patterns
+    if [[ "$filename_lower" == *"clip"* ]]; then
         echo "$COMFYUI_DIR/models/clip"
         return
     fi
@@ -101,7 +119,10 @@ get_type_name() {
         *"/embeddings"*) echo "Embedding" ;;
         *"/upscale_models"*) echo "Upscaler" ;;
         *"/controlnet"*) echo "ControlNet" ;;
+        *"/clip_vision"*) echo "CLIP Vision" ;;
         *"/clip"*) echo "CLIP" ;;
+        *"/diffusion_models"*) echo "Diffusion Model" ;;
+        *"/text_encoders"*) echo "Text Encoder" ;;
         *"/workflows"*) echo "Workflow" ;;
         *"/checkpoints"*) echo "Checkpoint" ;;
         *) echo "Other" ;;
@@ -278,7 +299,7 @@ sync_from_gdrive() {
 
     echo ""
     echo -e "${BOLD}Files in each directory:${NC}"
-    for dir in checkpoints loras vae embeddings upscale_models controlnet clip; do
+    for dir in checkpoints loras vae embeddings upscale_models controlnet clip clip_vision diffusion_models text_encoders; do
         full_path="$COMFYUI_DIR/models/$dir"
         if [ -d "$full_path" ]; then
             count=$(find "$full_path" -maxdepth 1 -type f \( -name "*.safetensors" -o -name "*.ckpt" -o -name "*.pt" -o -name "*.pth" \) 2>/dev/null | wc -l)

@@ -9,6 +9,7 @@ detect_comfyui_installation() {
     POSSIBLE_DIRS=(
         "/workspace/ComfyUI"
         "/workspace/comfyui"
+        "/workspace/runpod-slim/ComfyUI"
         "/workspace/stable-diffusion-webui/extensions/ComfyUI"
         "/comfyui"
         "/app/ComfyUI"

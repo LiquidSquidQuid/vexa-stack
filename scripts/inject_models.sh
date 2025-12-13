@@ -199,6 +199,7 @@ process_manifest() {
             diffusion_model) dest_dir="$COMFYUI_DIR/models/diffusion_models" ;;
             text_encoder) dest_dir="$COMFYUI_DIR/models/text_encoders" ;;
             clip_vision) dest_dir="$COMFYUI_DIR/models/clip_vision" ;;
+            motion_model) dest_dir="$COMFYUI_DIR/models/animatediff_models" ;;
             sams) dest_dir="$COMFYUI_DIR/models/sams" ;;
             ultralytics_bbox) dest_dir="$COMFYUI_DIR/models/ultralytics/bbox" ;;
             ultralytics_segm) dest_dir="$COMFYUI_DIR/models/ultralytics/segm" ;;

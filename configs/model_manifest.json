@@ -24,7 +24,7 @@
       "source": "huggingface",
       "size": "7.11GB",
       "description": "Pony Realism base model - good for faces and skin detail",
-      "required": false,
+      "required": true,
       "category": "t2i"
     },
     {
@@ -34,7 +34,7 @@
       "source": "huggingface",
       "size": "6.94GB",
       "description": "CyberRealistic Pony refiner model - blends Pony with CyberRealistic style",
-      "required": false,
+      "required": true,
       "category": "t2i"
     },
     {
@@ -44,7 +44,7 @@
       "source": "huggingface",
       "size": "7.11GB",
       "description": "Juggernaut XL v9 - professional photography-focused SDXL model",
-      "required": false,
+      "required": true,
       "category": "t2i"
     },
     {
@@ -54,7 +54,7 @@
       "source": "huggingface",
       "size": "6.94GB",
       "description": "Pony Diffusion V6 XL base - versatile model, use CLIP skip 2",
-      "required": false,
+      "required": true,
       "category": "t2i"
     },
     {
@@ -64,7 +64,7 @@
       "source": "huggingface",
       "size": "6.94GB",
       "description": "Animagine XL 4.0 - anime-specialized SDXL model",
-      "required": false,
+      "required": true,
       "category": "t2i"
     },
     {
@@ -74,7 +74,7 @@
       "source": "huggingface",
       "size": "6.94GB",
       "description": "EpicRealism XL v8 - photorealistic SDXL with excellent skin and lighting",
-      "required": false,
+      "required": true,
       "category": "t2i"
     },
     {
@@ -234,7 +234,7 @@
       "source": "huggingface",
       "size": "8.5GB",
       "description": "GGUF quantized Wan 2.1 I2V - lower VRAM (~8GB), works with existing workflows",
-      "required": false,
+      "required": true,
       "category": "i2v"
     },
     {

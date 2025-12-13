@@ -45,6 +45,16 @@ if ! command -v jq &> /dev/null; then
     fi
 fi
 
+# Install aria2c for better large file downloads (optional but recommended)
+if ! command -v aria2c &> /dev/null; then
+    echo -e "${YELLOW}Installing aria2c for reliable large file downloads...${NC}"
+    if [[ "$OSTYPE" != "darwin"* ]]; then
+        apt-get install -y -qq aria2 2>/dev/null || {
+            echo -e "${DIM}aria2c not available, using wget/curl${NC}"
+        }
+    fi
+fi
+
 # Function to format file size
 format_size() {
     local size="$1"
@@ -68,35 +78,55 @@ check_file_status() {
     fi
 }
 
-# Function to download a file with progress bar
+# Function to download a file with progress bar and resume support
 download_with_progress() {
     local url="$1"
     local dest="$2"
     local name="$3"
     local size="$4"
 
-    # Create temp file for download
+    # Use .downloading suffix for temp file (supports resume)
     local temp_file="${dest}.downloading"
 
-    # Try wget first (better progress display)
+    # Try aria2c first (best for large files - parallel chunks with resume)
+    if command -v aria2c &> /dev/null; then
+        aria2c -x 8 -s 8 -c \
+               -d "$(dirname "$temp_file")" -o "$(basename "$temp_file")" \
+               --max-tries=5 --retry-wait=10 --timeout=300 \
+               --file-allocation=none --console-log-level=warn \
+               "$url" 2>&1 && {
+            mv "$temp_file" "$dest"
+            return 0
+        }
+    fi
+
+    # Try wget with resume support (--continue flag)
     if command -v wget &> /dev/null; then
         wget --progress=bar:force:noscroll \
-             --timeout=60 --tries=3 \
+             --timeout=300 --tries=5 --wait=10 --waitretry=30 \
+             --continue \
              -q --show-progress \
              "$url" -O "$temp_file" 2>&1 && {
             mv "$temp_file" "$dest"
             return 0
         }
-    # Fallback to curl
-    elif command -v curl &> /dev/null; then
-        curl -# -L --connect-timeout 60 --retry 3 \
+        # If wget failed but partial file exists (>1MB), keep it for resume
+        local partial_size=$(stat -c%s "$temp_file" 2>/dev/null || stat -f%z "$temp_file" 2>/dev/null || echo 0)
+        if [ -f "$temp_file" ] && [ "$partial_size" -gt 1000000 ]; then
+            echo -e "    ${YELLOW}Partial download saved ($(($partial_size / 1048576))MB) - run again to resume${NC}"
+            return 1
+        fi
+    fi
+
+    # Fallback to curl with resume (-C - flag)
+    if command -v curl &> /dev/null; then
+        curl -# -L -C - --connect-timeout 60 --max-time 3600 --retry 5 --retry-delay 10 \
              "$url" -o "$temp_file" && {
             mv "$temp_file" "$dest"
             return 0
         }
     fi
 
-    rm -f "$temp_file"
     return 1
 }
 

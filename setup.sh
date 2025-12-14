@@ -99,10 +99,16 @@ cd - > /dev/null
 echo -e "${GREEN}✓ ComfyUI updated${NC}"
 
 # Install common dependencies for custom nodes
-echo -e "${YELLOW}Installing common node dependencies...${NC}"
-pip install -q piexif dill numexpr scikit-image ultralytics imageio-ffmpeg 2>/dev/null || {
-    echo -e "${YELLOW}Warning: Some optional dependencies may have failed${NC}"
-}
+echo -e "${YELLOW}Installing Python dependencies for custom nodes...${NC}"
+
+# Critical dependencies - install individually to catch failures
+for pkg in scikit-image numexpr imageio-ffmpeg; do
+    pip install -q "$pkg" || echo -e "${RED}Failed to install $pkg${NC}"
+done
+
+# Optional dependencies
+pip install -q piexif dill ultralytics 2>/dev/null || true
+
 echo -e "${GREEN}✓ Node dependencies installed${NC}"
 
 # Detect GPU

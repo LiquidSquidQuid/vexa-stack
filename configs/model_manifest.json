@@ -254,7 +254,7 @@
       "source": "huggingface",
       "size": "26GB",
       "description": "HunyuanVideo I2V 720p - higher quality alternative to Wan",
-      "required": false,
+      "required": true,
       "category": "i2v"
     },
     {
@@ -264,7 +264,7 @@
       "source": "huggingface",
       "size": "200MB",
       "description": "HunyuanVideo VAE for video decoding",
-      "required": false,
+      "required": true,
       "category": "i2v"
     },
     {
@@ -274,7 +274,7 @@
       "source": "huggingface",
       "size": "4.5GB",
       "description": "LLaVA LLaMA3 text encoder for HunyuanVideo",
-      "required": false,
+      "required": true,
       "category": "i2v"
     },
     {
@@ -284,7 +284,7 @@
       "source": "huggingface",
       "size": "250MB",
       "description": "CLIP-L text encoder for HunyuanVideo",
-      "required": false,
+      "required": true,
       "category": "i2v"
     },
     {
@@ -294,7 +294,7 @@
       "source": "huggingface",
       "size": "1.8GB",
       "description": "LLaVA LLaMA3 vision encoder for HunyuanVideo I2V",
-      "required": false,
+      "required": true,
       "category": "i2v"
     },
     {

@@ -188,11 +188,20 @@
       "install_type": "git_clone",
       "post_install": null,
       "category": "i2v"
+    },
+    {
+      "name": "ComfyUI-ReActor",
+      "url": "https://github.com/Gourieff/ComfyUI-ReActor.git",
+      "description": "Face swap for character consistency in AI Influencer videos",
+      "required": true,
+      "install_type": "git_clone",
+      "post_install": "pip install -r requirements.txt && pip install insightface onnxruntime-gpu",
+      "category": "i2v"
     }
   ],
   "install_settings": {
     "auto_update": false,
     "install_dependencies": true,
-    "restart_required_after": ["ComfyUI-Manager", "ComfyUI-Impact-Pack", "ComfyUI-VideoHelperSuite", "ComfyUI-Frame-Interpolation"]
+    "restart_required_after": ["ComfyUI-Manager", "ComfyUI-Impact-Pack", "ComfyUI-VideoHelperSuite", "ComfyUI-Frame-Interpolation", "ComfyUI-ReActor"]
   }
 }

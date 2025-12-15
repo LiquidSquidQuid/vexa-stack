@@ -233,6 +233,8 @@ process_manifest() {
             sams) dest_dir="$COMFYUI_DIR/models/sams" ;;
             ultralytics_bbox) dest_dir="$COMFYUI_DIR/models/ultralytics/bbox" ;;
             ultralytics_segm) dest_dir="$COMFYUI_DIR/models/ultralytics/segm" ;;
+            insightface) dest_dir="$COMFYUI_DIR/models/insightface" ;;
+            facerestore) dest_dir="$COMFYUI_DIR/models/facerestore_models" ;;
             *) dest_dir="$COMFYUI_DIR/models/$type" ;;
         esac
 
@@ -374,10 +376,10 @@ fi
 print_header "FINAL STATUS"
 
 echo -e "${BOLD}Model directories:${NC}"
-for dir in checkpoints loras vae embeddings upscale_models controlnet diffusion_models text_encoders clip_vision; do
+for dir in checkpoints loras vae embeddings upscale_models controlnet diffusion_models text_encoders clip_vision insightface facerestore_models; do
     full_path="$COMFYUI_DIR/models/$dir"
     if [ -d "$full_path" ]; then
-        count=$(find "$full_path" -maxdepth 1 -type f \( -name "*.safetensors" -o -name "*.ckpt" -o -name "*.pth" -o -name "*.pt" \) 2>/dev/null | wc -l)
+        count=$(find "$full_path" -maxdepth 1 -type f \( -name "*.safetensors" -o -name "*.ckpt" -o -name "*.pth" -o -name "*.pt" -o -name "*.onnx" \) 2>/dev/null | wc -l)
         echo -e "  ${FOLDER} ${dir}: ${GREEN}${count}${NC} files"
     fi
 done

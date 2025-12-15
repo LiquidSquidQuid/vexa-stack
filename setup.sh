@@ -126,6 +126,8 @@ mkdir -p "$COMFYUI_DIR/models/diffusion_models"
 mkdir -p "$COMFYUI_DIR/models/text_encoders"
 mkdir -p "$COMFYUI_DIR/models/clip_vision"
 mkdir -p "$COMFYUI_DIR/models/upscale_models"
+mkdir -p "$COMFYUI_DIR/models/insightface"
+mkdir -p "$COMFYUI_DIR/models/facerestore_models"
 mkdir -p "$COMFYUI_DIR/custom_nodes"
 mkdir -p "$COMFYUI_DIR/workflows"
 

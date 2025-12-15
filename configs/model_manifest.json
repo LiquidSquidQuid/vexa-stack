@@ -336,6 +336,56 @@
       "description": "AnimateDiff SDXL motion adapter - animate SDXL images, ~13GB VRAM",
       "required": false,
       "category": "i2v"
+    },
+    {
+      "type": "diffusion_model",
+      "name": "wan2.1_i2v_480p_14B_fp8_e4m3fn.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_fp8_e4m3fn.safetensors",
+      "source": "huggingface",
+      "size": "14GB",
+      "description": "Wan 2.1 I2V fp8 - recommended for CausVid LoRA, good VRAM/quality balance",
+      "required": true,
+      "category": "i2v"
+    },
+    {
+      "type": "lora",
+      "name": "causvid_lora.safetensors",
+      "url": "https://huggingface.co/tianweiy/CausVid/resolve/main/causvid_lora.safetensors",
+      "source": "huggingface",
+      "size": "1.2GB",
+      "description": "CausVid LoRA - reduces Wan steps from 50 to 8, 6x speedup for AI Influencer workflow",
+      "required": true,
+      "category": "i2v"
+    },
+    {
+      "type": "insightface",
+      "name": "inswapper_128.onnx",
+      "url": "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx",
+      "source": "huggingface",
+      "size": "555MB",
+      "description": "InsightFace face swap model for ReActor - fixes character drift in videos",
+      "required": true,
+      "category": "i2v"
+    },
+    {
+      "type": "facerestore",
+      "name": "GPEN-BFR-512.onnx",
+      "url": "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/facerestore_models/GPEN-BFR-512.onnx",
+      "source": "huggingface",
+      "size": "290MB",
+      "description": "GPEN face restoration for ReActor post-processing",
+      "required": true,
+      "category": "i2v"
+    },
+    {
+      "type": "ultralytics_bbox",
+      "name": "face_yolov8m.pt",
+      "url": "https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt",
+      "source": "huggingface",
+      "size": "52MB",
+      "description": "YOLOv8m face detection - higher accuracy than n variant for ReActor",
+      "required": true,
+      "category": "i2v"
     }
   ],
   "file_routing": {

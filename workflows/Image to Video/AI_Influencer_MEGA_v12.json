@@ -1,0 +1,380 @@
+{
+  "last_node_id": 35,
+  "last_link_id": 45,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [50, 100],
+      "size": [315, 98],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [1], "slot_index": 0},
+        {"name": "CLIP", "type": "CLIP", "links": [2], "slot_index": 1},
+        {"name": "VAE", "type": "VAE", "links": [3], "slot_index": 2}
+      ],
+      "properties": {"Node name for S&R": "CheckpointLoaderSimple"},
+      "widgets_values": ["mega-v12-nsfw.safetensors"],
+      "color": "#322",
+      "bgcolor": "#533",
+      "title": "🎬 MEGA v12 NSFW Checkpoint"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [50, 280],
+      "size": [315, 314],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [4, 20], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["your_character_image.png", "image"],
+      "color": "#232",
+      "bgcolor": "#353",
+      "title": "📷 Character Image (Input)"
+    },
+    {
+      "id": 3,
+      "type": "ImageResize+",
+      "pos": [50, 650],
+      "size": [315, 130],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 4}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [5], "slot_index": 0},
+        {"name": "width", "type": "INT", "links": null},
+        {"name": "height", "type": "INT", "links": null}
+      ],
+      "properties": {"Node name for S&R": "ImageResize+"},
+      "widgets_values": [480, 848, "lanczos", "disabled", "always", 64],
+      "title": "📐 Resize to Portrait (480x848)"
+    },
+    {
+      "id": 4,
+      "type": "CLIPTextEncode",
+      "pos": [420, 100],
+      "size": [400, 150],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 2}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [6], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["A beautiful woman with dark hair. She slowly turns her head and smiles naturally. Her hair sways gently. Soft natural lighting, cinematic."],
+      "color": "#232",
+      "bgcolor": "#353",
+      "title": "✏️ Positive Prompt"
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [420, 290],
+      "size": [400, 100],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 2}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [7], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["cartoon, anime, 3d render, cgi, illustration, blurry, low quality, distorted, morphing, scene change, jump cut, text, watermark, static, frozen, multiple people"],
+      "color": "#322",
+      "bgcolor": "#533",
+      "title": "❌ Negative Prompt"
+    },
+    {
+      "id": 6,
+      "type": "EmptyLatentVideo",
+      "pos": [420, 430],
+      "size": [315, 106],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [8], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "EmptyLatentVideo"},
+      "widgets_values": [480, 848, 81, 1],
+      "color": "#223",
+      "bgcolor": "#335",
+      "title": "🎞️ Video Latent (81 frames = 5 sec)"
+    },
+    {
+      "id": 7,
+      "type": "WanImageToVideo",
+      "pos": [420, 580],
+      "size": [315, 150],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "positive", "type": "CONDITIONING", "link": 6},
+        {"name": "negative", "type": "CONDITIONING", "link": 7},
+        {"name": "vae", "type": "VAE", "link": 3},
+        {"name": "image", "type": "IMAGE", "link": 5},
+        {"name": "latent", "type": "LATENT", "link": 8}
+      ],
+      "outputs": [
+        {"name": "positive", "type": "CONDITIONING", "links": [9], "slot_index": 0},
+        {"name": "negative", "type": "CONDITIONING", "links": [10], "slot_index": 1},
+        {"name": "latent", "type": "LATENT", "links": [11], "slot_index": 2}
+      ],
+      "properties": {"Node name for S&R": "WanImageToVideo"},
+      "widgets_values": [480, 848, 81, 1, 3.5],
+      "title": "🎬 Wan I2V Conditioning"
+    },
+    {
+      "id": 8,
+      "type": "KSampler",
+      "pos": [800, 100],
+      "size": [315, 262],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 1},
+        {"name": "positive", "type": "CONDITIONING", "link": 9},
+        {"name": "negative", "type": "CONDITIONING", "link": 10},
+        {"name": "latent_image", "type": "LATENT", "link": 11}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [12], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "KSampler"},
+      "widgets_values": [42, "fixed", 4, 1, "euler_ancestral", "beta", 1],
+      "color": "#322",
+      "bgcolor": "#533",
+      "title": "⚡ Fast Sampler (4 steps, CFG 1)"
+    },
+    {
+      "id": 9,
+      "type": "VAEDecode",
+      "pos": [800, 420],
+      "size": [210, 46],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 12},
+        {"name": "vae", "type": "VAE", "link": 3}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [13], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "VAEDecode"},
+      "title": "🖼️ VAE Decode"
+    },
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [50, 830],
+      "size": [315, 200],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "properties": {"text": ""},
+      "widgets_values": [
+        "=== AI INFLUENCER VIDEO WORKFLOW ===\n\n✅ MEGA v12 NSFW: All-in-one checkpoint\n✅ 4 steps, CFG 1: Maximum speed\n✅ ReActor: Face consistency fix\n✅ RIFE: Smooth 32fps output\n\n📦 DOWNLOADS:\n- mega-v12-nsfw.safetensors → checkpoints/\n- inswapper_128.onnx → insightface/\n- GPEN-BFR-512.onnx → facerestore_models/\n\n⏱️ Expected time: ~5 minutes total"
+      ],
+      "color": "#432",
+      "bgcolor": "#653",
+      "title": "📋 Instructions"
+    },
+    {
+      "id": 11,
+      "type": "ReActorFaceSwap",
+      "pos": [1150, 100],
+      "size": [315, 338],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {"name": "source_image", "type": "IMAGE", "link": 20},
+        {"name": "input_image", "type": "IMAGE", "link": 13}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [14], "slot_index": 0},
+        {"name": "FACE_MODEL", "type": "FACE_MODEL", "links": null}
+      ],
+      "properties": {"Node name for S&R": "ReActorFaceSwap"},
+      "widgets_values": [
+        true,
+        "inswapper_128.onnx",
+        "retinaface_resnet50",
+        "GPEN-BFR-512.onnx",
+        1,
+        "no",
+        "no",
+        "0",
+        "0",
+        1
+      ],
+      "color": "#223",
+      "bgcolor": "#335",
+      "title": "👤 ReActor Face Swap (Character Fix)"
+    },
+    {
+      "id": 12,
+      "type": "RIFE VFI",
+      "pos": [1150, 500],
+      "size": [315, 178],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {"name": "frames", "type": "IMAGE", "link": 14}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [15], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "RIFE VFI"},
+      "widgets_values": ["rife49.pth", 2, 1, true, true, 1],
+      "color": "#232",
+      "bgcolor": "#353",
+      "title": "🎞️ RIFE 2x Interpolation (16→32fps)"
+    },
+    {
+      "id": 13,
+      "type": "VHS_VideoCombine",
+      "pos": [1500, 100],
+      "size": [315, 290],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 15}
+      ],
+      "outputs": [
+        {"name": "Filenames", "type": "VHS_FILENAMES", "links": null}
+      ],
+      "properties": {"Node name for S&R": "VHS_VideoCombine"},
+      "widgets_values": [
+        32,
+        0,
+        "video/h264-mp4",
+        true,
+        true,
+        "ai_influencer_output",
+        "output",
+        false,
+        true,
+        "",
+        "",
+        17,
+        "default",
+        null
+      ],
+      "color": "#322",
+      "bgcolor": "#533",
+      "title": "💾 Save Video (h264 MP4, 32fps)"
+    },
+    {
+      "id": 14,
+      "type": "Note",
+      "pos": [1500, 450],
+      "size": [315, 250],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "properties": {"text": ""},
+      "widgets_values": [
+        "=== QUICK SETTINGS REFERENCE ===\n\n🎬 SAMPLER:\n- Steps: 4 (max speed) or 8 (quality)\n- CFG: 1 (required for MEGA)\n- Sampler: euler_ancestral\n- Scheduler: beta\n\n📐 RESOLUTION:\n- Portrait: 480x848 or 720x1280\n- Landscape: 848x480 or 1280x720\n\n🎞️ FRAMES:\n- 33 = ~2 sec (test)\n- 81 = ~5 sec (standard)\n- 161 = ~10 sec (long)\n\n👤 FACE SWAP:\n- Always use original character image\n- Face boost: enabled"
+      ],
+      "color": "#234",
+      "bgcolor": "#456",
+      "title": "⚙️ Settings Reference"
+    },
+    {
+      "id": 15,
+      "type": "Note",
+      "pos": [420, 780],
+      "size": [400, 250],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "properties": {"text": ""},
+      "widgets_values": [
+        "=== PROMPTING TIPS ===\n\n✅ GOOD:\n\"A woman turns her head and smiles.\"\n\"She waves slowly at the camera.\"\n\"Natural breathing, subtle movement.\"\n\n❌ BAD:\n\"Complex choreographed dance sequence with multiple camera angles and dramatic lighting changes.\"\n\n📝 STRUCTURE:\n[Subject]. [Simple action]. [Optional: camera/lighting].\n\n💡 The MEGA NSFW checkpoint understands anatomical and action terminology directly - be descriptive but simple."
+      ],
+      "color": "#243",
+      "bgcolor": "#354",
+      "title": "✏️ Prompting Guide"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 8, 0, "MODEL"],
+    [2, 1, 1, 4, 0, "CLIP"],
+    [3, 1, 2, 9, 1, "VAE"],
+    [4, 2, 0, 3, 0, "IMAGE"],
+    [5, 3, 0, 7, 3, "IMAGE"],
+    [6, 4, 0, 7, 0, "CONDITIONING"],
+    [7, 5, 0, 7, 1, "CONDITIONING"],
+    [8, 6, 0, 7, 4, "LATENT"],
+    [9, 7, 0, 8, 1, "CONDITIONING"],
+    [10, 7, 1, 8, 2, "CONDITIONING"],
+    [11, 7, 2, 8, 3, "LATENT"],
+    [12, 8, 0, 9, 0, "LATENT"],
+    [13, 9, 0, 11, 1, "IMAGE"],
+    [14, 11, 0, 12, 0, "IMAGE"],
+    [15, 12, 0, 13, 0, "IMAGE"],
+    [20, 2, 0, 11, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "📥 INPUT",
+      "bounding": [40, 50, 350, 780],
+      "color": "#3f789e"
+    },
+    {
+      "title": "⚙️ GENERATION",
+      "bounding": [410, 50, 380, 720],
+      "color": "#88A"
+    },
+    {
+      "title": "🔧 PROCESSING",
+      "bounding": [800, 50, 340, 440],
+      "color": "#8A8"
+    },
+    {
+      "title": "👤 FACE FIX",
+      "bounding": [1140, 50, 340, 640],
+      "color": "#A88"
+    },
+    {
+      "title": "💾 OUTPUT",
+      "bounding": [1490, 50, 340, 400],
+      "color": "#8A8"
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7,
+      "offset": [0, 0]
+    },
+    "info": {
+      "name": "AI Influencer Video - MEGA v12 + ReActor",
+      "author": "Research compilation",
+      "description": "Fast AI influencer video generation with character consistency. 4 steps, ~5 minutes total.",
+      "version": "1.0",
+      "created": "2025-12-14"
+    }
+  }
+}

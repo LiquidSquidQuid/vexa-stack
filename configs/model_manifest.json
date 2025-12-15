@@ -178,162 +178,22 @@
       "category": "t2i"
     },
     {
-      "type": "diffusion_model",
-      "name": "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+      "type": "checkpoint",
+      "name": "mega-v12-nsfw.safetensors",
+      "url": "https://huggingface.co/Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/mega-v12-nsfw.safetensors",
       "source": "huggingface",
-      "size": "14GB",
-      "description": "Wan 2.2 I2V High-Noise Model (first pass) for image-to-video",
+      "size": "11GB",
+      "description": "MEGA v12 NSFW - All-in-one I2V checkpoint with accelerators. Use: 4 steps, CFG 1, euler_ancestral, beta",
       "required": true,
       "category": "i2v"
     },
     {
-      "type": "diffusion_model",
-      "name": "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "type": "checkpoint",
+      "name": "mega-v12.safetensors",
+      "url": "https://huggingface.co/Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/mega-v12.safetensors",
       "source": "huggingface",
-      "size": "14GB",
-      "description": "Wan 2.2 I2V Low-Noise Model (refine pass) for image-to-video",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "vae",
-      "name": "wan_2.1_vae.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors",
-      "source": "huggingface",
-      "size": "335MB",
-      "description": "Wan VAE for video generation",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "text_encoder",
-      "name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
-      "source": "huggingface",
-      "size": "5GB",
-      "description": "UMT5 XXL text encoder for Wan video models",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "clip_vision",
-      "name": "clip_vision_h.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors",
-      "source": "huggingface",
-      "size": "2GB",
-      "description": "CLIP Vision H for image encoding in Wan I2V",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "diffusion_model",
-      "name": "wan2.1-i2v-14b-480p-Q5_K_S.gguf",
-      "url": "https://huggingface.co/city96/Wan2.1-I2V-14B-gguf/resolve/main/wan2.1-i2v-14b-480p-Q5_K_S.gguf",
-      "source": "huggingface",
-      "size": "8.5GB",
-      "description": "GGUF quantized Wan 2.1 I2V - lower VRAM (~8GB), works with existing workflows",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "diffusion_model",
-      "name": "wan2.1_fun_InP_1.3B_bf16.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_fun_InP_1.3B_bf16.safetensors",
-      "source": "huggingface",
-      "size": "2.6GB",
-      "description": "Lightweight Wan 2.1 1.3B - fast iterations, ~6GB VRAM",
-      "required": false,
-      "category": "i2v"
-    },
-    {
-      "type": "diffusion_model",
-      "name": "hunyuan_video_image_to_video_720p_bf16.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/diffusion_models/hunyuan_video_image_to_video_720p_bf16.safetensors",
-      "source": "huggingface",
-      "size": "26GB",
-      "description": "HunyuanVideo I2V 720p - higher quality alternative to Wan",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "vae",
-      "name": "hunyuan_video_vae_bf16.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/vae/hunyuan_video_vae_bf16.safetensors",
-      "source": "huggingface",
-      "size": "200MB",
-      "description": "HunyuanVideo VAE for video decoding",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "text_encoder",
-      "name": "llava_llama3_fp8_scaled.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/text_encoders/llava_llama3_fp8_scaled.safetensors",
-      "source": "huggingface",
-      "size": "4.5GB",
-      "description": "LLaVA LLaMA3 text encoder for HunyuanVideo",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "text_encoder",
-      "name": "clip_l.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/text_encoders/clip_l.safetensors",
-      "source": "huggingface",
-      "size": "250MB",
-      "description": "CLIP-L text encoder for HunyuanVideo",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "clip_vision",
-      "name": "llava_llama3_vision.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/HunyuanVideo_repackaged/resolve/main/split_files/clip_vision/llava_llama3_vision.safetensors",
-      "source": "huggingface",
-      "size": "1.8GB",
-      "description": "LLaVA LLaMA3 vision encoder for HunyuanVideo I2V",
-      "required": true,
-      "category": "i2v"
-    },
-    {
-      "type": "diffusion_model",
-      "name": "wan2.1_i2v_480p_14B_bf16.safetensors",
-      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_bf16.safetensors",
-      "source": "huggingface",
-      "size": "32.8GB",
-      "description": "Wan 2.1 I2V 480p full precision BF16 - highest quality, needs 40GB+ VRAM",
-      "required": false,
-      "category": "i2v"
-    },
-    {
-      "type": "diffusion_model",
-      "name": "svd.safetensors",
-      "url": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid/resolve/main/svd.safetensors",
-      "source": "huggingface",
-      "size": "9.56GB",
-      "description": "Stable Video Diffusion I2V - 576x1024, ~12GB VRAM, VRAM-efficient",
-      "required": false,
-      "category": "i2v"
-    },
-    {
-      "type": "diffusion_model",
-      "name": "svd_image_decoder.safetensors",
-      "url": "https://huggingface.co/stabilityai/stable-video-diffusion-img2vid/resolve/main/svd_image_decoder.safetensors",
-      "source": "huggingface",
-      "size": "9.5GB",
-      "description": "SVD image decoder - required for Stable Video Diffusion",
-      "required": false,
-      "category": "i2v"
-    },
-    {
-      "type": "motion_model",
-      "name": "animatediff-motion-adapter-sdxl-beta.safetensors",
-      "url": "https://huggingface.co/guoyww/animatediff-motion-adapter-sdxl-beta/resolve/main/diffusion_pytorch_model.fp16.safetensors",
-      "source": "huggingface",
-      "size": "474MB",
-      "description": "AnimateDiff SDXL motion adapter - animate SDXL images, ~13GB VRAM",
+      "size": "11GB",
+      "description": "MEGA v12 SFW - All-in-one I2V checkpoint with accelerators. Use: 4 steps, CFG 1, euler_ancestral, beta",
       "required": false,
       "category": "i2v"
     },
@@ -343,8 +203,48 @@
       "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_fp8_e4m3fn.safetensors",
       "source": "huggingface",
       "size": "14GB",
-      "description": "Wan 2.1 I2V fp8 - recommended for CausVid LoRA, good VRAM/quality balance",
-      "required": true,
+      "description": "Wan 2.1 I2V fp8 - base for FusionX/Lightx2v LoRAs, good VRAM/quality balance",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "diffusion_model",
+      "name": "wan2.1-i2v-14b-480p-Q5_K_S.gguf",
+      "url": "https://huggingface.co/city96/Wan2.1-I2V-14B-gguf/resolve/main/wan2.1-i2v-14b-480p-Q5_K_S.gguf",
+      "source": "huggingface",
+      "size": "8.5GB",
+      "description": "GGUF quantized Wan 2.1 I2V - low VRAM option (~8GB)",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "vae",
+      "name": "wan_2.1_vae.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors",
+      "source": "huggingface",
+      "size": "335MB",
+      "description": "Wan VAE for video generation (used with Wan 2.1 base models)",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "text_encoder",
+      "name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "source": "huggingface",
+      "size": "5GB",
+      "description": "UMT5 XXL text encoder for Wan 2.1 models",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "clip_vision",
+      "name": "clip_vision_h.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors",
+      "source": "huggingface",
+      "size": "2GB",
+      "description": "CLIP Vision H for image encoding in Wan 2.1 I2V",
+      "required": false,
       "category": "i2v"
     },
     {
@@ -353,8 +253,28 @@
       "url": "https://huggingface.co/tianweiy/CausVid/resolve/main/causvid_lora.safetensors",
       "source": "huggingface",
       "size": "1.2GB",
-      "description": "CausVid LoRA - reduces Wan steps from 50 to 8, 6x speedup for AI Influencer workflow",
-      "required": true,
+      "description": "CausVid LoRA - reduces Wan 2.1 steps from 50 to 8, 6x speedup",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "lora",
+      "name": "Wan2.1_I2V_14B_FusionX_LoRA.safetensors",
+      "url": "https://huggingface.co/vrgamedevgirl84/Wan14BT2VFusioniX/resolve/main/Wan2.1_I2V_14B_FusionX_LoRA.safetensors",
+      "source": "huggingface",
+      "size": "1.5GB",
+      "description": "FusionX LoRA - Quality enhancement for Wan 2.1, use 8-10 steps at strength 1.0-2.0",
+      "required": false,
+      "category": "i2v"
+    },
+    {
+      "type": "lora",
+      "name": "lightx2v_i2v_4step.safetensors",
+      "url": "https://huggingface.co/lightx2v/Wan2.1-I2V-14B-480P-StepDistill-CfgDistill-Lightx2v/resolve/main/loras/Wan21_I2V_14B_lightx2v_cfg_step_distill_lora_rank64.safetensors",
+      "source": "huggingface",
+      "size": "400MB",
+      "description": "Lightx2v 4-step LoRA - Maximum speed for Wan 2.1, use 4 steps",
+      "required": false,
       "category": "i2v"
     },
     {
@@ -380,10 +300,10 @@
     {
       "type": "ultralytics_bbox",
       "name": "face_yolov8m.pt",
-      "url": "https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt",
+      "url": "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/detection/bbox/face_yolov8m.pt",
       "source": "huggingface",
       "size": "52MB",
-      "description": "YOLOv8m face detection - higher accuracy than n variant for ReActor",
+      "description": "YOLOv8m face detection - higher accuracy for ReActor",
       "required": true,
       "category": "i2v"
     }

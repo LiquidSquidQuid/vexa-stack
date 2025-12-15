@@ -147,8 +147,8 @@
     {
       "name": "ComfyUI_essentials",
       "url": "https://github.com/cubiq/ComfyUI_essentials.git",
-      "description": "Essential utility nodes including SDXLEmptyLatentSizePicker",
-      "required": false,
+      "description": "Essential utility nodes including ImageResize+ for I2V workflows",
+      "required": true,
       "install_type": "git_clone",
       "post_install": null,
       "category": "common"

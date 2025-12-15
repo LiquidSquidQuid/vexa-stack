@@ -29,12 +29,12 @@ echo -e "${BOLD}║${NC}     ${DIM}Photorealistic image generation with SDXL${NC
 echo -e "${BOLD}║${NC}     ${GREEN}Required: ~7 GB${NC}  ${DIM}| Optional: +43 GB | Total: ~50 GB${NC}    ${BOLD}║${NC}"
 echo -e "${BOLD}║${NC}                                                               ${BOLD}║${NC}"
 echo -e "${BOLD}║${NC}  ${CYAN}2)${NC} Image-to-Video only                                      ${BOLD}║${NC}"
-echo -e "${BOLD}║${NC}     ${DIM}Video generation with Wan 2.2 + HunyuanVideo${NC}            ${BOLD}║${NC}"
-echo -e "${BOLD}║${NC}     ${GREEN}Required: ~35 GB${NC} ${DIM}| Optional: +96 GB | Total: ~131 GB${NC}   ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}     ${DIM}Video generation with MEGA v12 + Wan 2.1${NC}               ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}     ${GREEN}Required: ~25 GB${NC} ${DIM}| Optional: +31 GB | Total: ~56 GB${NC}    ${BOLD}║${NC}"
 echo -e "${BOLD}║${NC}                                                               ${BOLD}║${NC}"
 echo -e "${BOLD}║${NC}  ${CYAN}3)${NC} Full Stack (T2I + I2V)                                   ${BOLD}║${NC}"
 echo -e "${BOLD}║${NC}     ${DIM}Both image generation and video capabilities${NC}           ${BOLD}║${NC}"
-echo -e "${BOLD}║${NC}     ${GREEN}Required: ~42 GB${NC} ${DIM}| Optional: +139 GB | Total: ~181 GB${NC}  ${BOLD}║${NC}"
+echo -e "${BOLD}║${NC}     ${GREEN}Required: ~32 GB${NC} ${DIM}| Optional: +74 GB | Total: ~106 GB${NC}   ${BOLD}║${NC}"
 echo -e "${BOLD}║${NC}                                                               ${BOLD}║${NC}"
 echo -e "${BOLD}╚═══════════════════════════════════════════════════════════════╝${NC}"
 echo -e "${DIM}Note: 'Required' = essential models, 'Optional' = alternatives${NC}"
@@ -80,6 +80,21 @@ fi
 
 echo -e "${GREEN}✓ Found ComfyUI at: $COMFYUI_DIR${NC}"
 echo -e "${GREEN}✓ ComfyUI running on port: $COMFYUI_PORT${NC}"
+
+# Offer cleanup of stale files from previous installations
+echo ""
+read -p "Clean up stale models/workflows from previous installs? [y/N]: " CLEANUP_CHOICE
+if [[ $CLEANUP_CHOICE =~ ^[Yy]$ ]]; then
+    echo -e "\n${YELLOW}Scanning for stale files...${NC}"
+    bash "$SCRIPT_DIR/scripts/cleanup_stale.sh" "$COMFYUI_DIR" --dry-run
+    echo ""
+    read -p "Proceed with deletion? [y/N]: " CONFIRM_DELETE
+    if [[ $CONFIRM_DELETE =~ ^[Yy]$ ]]; then
+        bash "$SCRIPT_DIR/scripts/cleanup_stale.sh" "$COMFYUI_DIR" --force
+    else
+        echo -e "${YELLOW}Cleanup skipped.${NC}"
+    fi
+fi
 
 # Update ComfyUI to latest version
 echo -e "\n${YELLOW}Updating ComfyUI to latest version...${NC}"
@@ -177,3 +192,4 @@ echo -e "Access ComfyUI at: http://localhost:${COMFYUI_PORT}"
 echo -e "Workflows available in: Load → vexa_*"
 echo -e "\nTo manually restart ComfyUI: ${YELLOW}bash $SCRIPT_DIR/scripts/restart_comfyui.sh${NC}"
 echo -e "To download additional models: ${YELLOW}bash $SCRIPT_DIR/scripts/inject_models.sh${NC}"
+echo -e "To cleanup stale files: ${YELLOW}bash $SCRIPT_DIR/scripts/cleanup_stale.sh${NC}"
